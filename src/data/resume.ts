@@ -1,6 +1,5 @@
 // Single source of truth — every fact on this site traces back to the resume.
 // File: public/resume/Meet_Jadhav_Resume.pdf
-
 export const profile = {
   name: "Meet Jadhav",
   role: "AI / Backend Engineer",
@@ -338,17 +337,6 @@ export const timeline: ExperienceItem[] = [
     period: "Aug 2025 – Present",
     bullets: [
       "LLM Evaluation Platform, AI Knowledge Assistant, and J.A.R.V.I.S. — built and shipped solo.",
-    ],
-  },
-  {
-    id: "exp-production",
-    kind: "experience",
-    title: "Production Associate",
-    org: "Manufacturing",
-    period: "Jun 2026 – Aug 2026",
-    bullets: [
-      "Collaborated with production and quality teams to identify process issues, support troubleshooting, and analyze data to meet manufacturing targets.",
-      "Prepared production documentation and performed quality inspections, applying analytical and process-improvement skills in a structured, standards-driven environment.",
     ],
   },
 ];
