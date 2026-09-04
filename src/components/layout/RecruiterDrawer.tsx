@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect } from "react";
+import Image from "next/image";
 import { X, Download, Code2, Link2, Mail, Phone, Zap } from "lucide-react";
 import { useRecruiterMode } from "./RecruiterModeContext";
 import { profile, projects, skillGroups } from "@/data/resume";
@@ -78,17 +79,28 @@ export function RecruiterDrawer() {
             </div>
 
             <div className="flex flex-1 flex-col gap-8 px-6 py-6">
-              <div>
-                <h3 className="font-display text-3xl tracking-wide text-paper">
-                  {profile.name}
-                </h3>
-                <p className="mt-1 font-mono text-xs tracking-[0.2em] text-web-blue-bright uppercase">
-                  {profile.role}
-                </p>
-                <p className="mt-3 text-sm leading-relaxed text-paper-dim">
-                  {profile.summary}
-                </p>
+              <div className="flex items-center gap-4">
+                <div className="relative flex h-[72px] w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-hairline">
+                  <Image
+                    src="/images/meet-jadhav.jpg"
+                    alt="Meet Jadhav"
+                    fill
+                    className="object-cover"
+                    sizes="72px"
+                  />
+                </div>
+                <div>
+                  <h3 className="font-display text-3xl tracking-wide text-paper">
+                    {profile.name}
+                  </h3>
+                  <p className="mt-1 font-mono text-xs tracking-[0.2em] text-web-blue-bright uppercase">
+                    {profile.role}
+                  </p>
+                </div>
               </div>
+              <p className="text-sm leading-relaxed text-paper-dim">
+                {profile.summary}
+              </p>
 
               <div className="grid grid-cols-2 gap-3">
                 <a
