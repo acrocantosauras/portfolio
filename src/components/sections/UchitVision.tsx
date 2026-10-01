@@ -142,7 +142,7 @@ export function UchitVision() {
 
               {/* timestamp */}
               <div className="absolute bottom-2 left-3 font-mono text-[9px] tracking-[0.2em] text-emerald-400/80">
-                {new Date().toLocaleDateString()} — ANALYTICS ACTIVE
+                LIVE FEED — ANALYTICS ACTIVE
               </div>
             </div>
 

@@ -102,7 +102,7 @@ export function FinalScene() {
         <div className="mx-auto mt-10 h-px w-24 bg-hairline" />
 
         <p className="mt-8 font-mono text-[11px] tracking-[0.15em] text-paper-dim uppercase">
-          {profile.name} · {profile.role} · © {new Date().getFullYear()}
+          {profile.name} · {profile.role} · © 2026
         </p>
         <p className="mt-1 font-mono text-[10px] text-paper-dim/70">
           Designed &amp; built from scratch — Next.js, TypeScript, Motion.
