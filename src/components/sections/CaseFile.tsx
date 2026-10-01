@@ -3,9 +3,7 @@
 import { motion } from "motion/react";
 import { Download, FileText } from "lucide-react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { profile, certifications, timeline } from "@/data/resume";
-
-const education = timeline.filter((t) => t.kind === "education");
+import { profile, certifications, education } from "@/data/resume";
 
 export function CaseFile() {
   return (
@@ -28,7 +26,7 @@ export function CaseFile() {
               </p>
             </div>
 
-            <div>
+              <div>
               <p className="font-mono text-[10px] tracking-[0.25em] text-web-blue-bright uppercase">
                 Education
               </p>

@@ -7,8 +7,8 @@ import { profile } from "@/data/resume";
 
 const EASTER_EGG_LINES = [
   "Signal received.",
-  "Web-shooters recalibrated.",
-  "Spider-sense: nominal.",
+  "Agents deployed.",
+  "Telemetry: nominal.",
   "Okay, you found it. Hi.",
 ];
 
@@ -41,15 +41,41 @@ export function FinalScene() {
 
       <div className="relative mx-auto max-w-7xl px-5 text-center sm:px-8">
         <p className="font-mono text-xs tracking-[0.35em] text-paper-dim uppercase">
-          End of Issue №01
+          End of Transmission
         </p>
         <h2 className="mt-3 font-display text-5xl tracking-wide text-paper sm:text-7xl">
-          TO BE <span className="text-signal-red-bright">CONTINUED</span>
+          SYSTEM <span className="text-signal-red-bright">STANDING BY</span>
         </h2>
-        <p className="mx-auto mt-4 max-w-md text-sm text-paper-dim">
-          The next issue is already in the queue — more systems, more proof,
-          more shipped work.
-        </p>
+
+        {/* footer nav */}
+        <nav className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3" aria-label="Footer">
+          <a
+            href={profile.github}
+            target="_blank"
+            rel="noreferrer"
+            data-sense="true"
+            className="font-mono text-xs tracking-[0.2em] text-paper-dim uppercase transition-colors hover:text-web-blue-bright"
+          >
+            GitHub
+          </a>
+          <a
+            href={profile.linkedin}
+            target="_blank"
+            rel="noreferrer"
+            data-sense="true"
+            className="font-mono text-xs tracking-[0.2em] text-paper-dim uppercase transition-colors hover:text-web-blue-bright"
+          >
+            LinkedIn
+          </a>
+          <a
+            href={profile.resumeUrl}
+            download
+            data-sense="true"
+            className="font-mono text-xs tracking-[0.2em] text-paper-dim uppercase transition-colors hover:text-signal-red-bright"
+          >
+            Resume
+          </a>
+        </nav>
 
         <button
           type="button"
@@ -76,7 +102,7 @@ export function FinalScene() {
         <div className="mx-auto mt-10 h-px w-24 bg-hairline" />
 
         <p className="mt-8 font-mono text-[11px] tracking-[0.15em] text-paper-dim uppercase">
-          {profile.name} · {profile.role} · {new Date().getFullYear()}
+          {profile.name} · {profile.role} · © {new Date().getFullYear()}
         </p>
         <p className="mt-1 font-mono text-[10px] text-paper-dim/70">
           Designed &amp; built from scratch — Next.js, TypeScript, Motion.

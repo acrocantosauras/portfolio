@@ -3,22 +3,40 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect } from "react";
 import Image from "next/image";
-import { X, Download, Code2, Link2, Mail, Phone, Zap } from "lucide-react";
+import {
+  X,
+  Download,
+  Code2,
+  Link2,
+  Mail,
+  Phone,
+  Zap,
+  ArrowRight,
+} from "lucide-react";
 import { useRecruiterMode } from "./RecruiterModeContext";
-import { profile, projects, skillGroups } from "@/data/resume";
+import { profile, projects, experience, skillGroups } from "@/data/resume";
 import { Chip } from "@/components/ui/Chip";
 
 const TOP_SKILLS = [
   "Python",
   "FastAPI",
+  "LangGraph",
+  "RAG / pgvector",
+  "Multi-Agent Systems",
   "PostgreSQL",
-  "Redis / arq",
-  "RAG",
-  "LLM Evaluation",
-  "Next.js",
+  "Redis",
   "Docker",
-  "CI/CD",
+  "YOLO / OpenCV",
   "Prometheus / Grafana",
+];
+
+const JUMPS = [
+  { href: "#aegisforge", label: "AegisForge" },
+  { href: "#experience", label: "Experience" },
+  { href: "#missions", label: "Projects" },
+  { href: "#workshop", label: "Skills" },
+  { href: "#casefile", label: "Resume" },
+  { href: "#contact", label: "Contact" },
 ];
 
 export function RecruiterDrawer() {
@@ -38,6 +56,8 @@ export function RecruiterDrawer() {
       document.body.style.overflow = "";
     };
   }, [open]);
+
+  const [flagship, ...rest] = projects;
 
   return (
     <AnimatePresence>
@@ -78,7 +98,8 @@ export function RecruiterDrawer() {
               </button>
             </div>
 
-            <div className="flex flex-1 flex-col gap-8 px-6 py-6">
+            <div className="flex flex-1 flex-col gap-7 px-6 py-6">
+              {/* about */}
               <div className="flex items-center gap-4">
                 <div className="relative flex h-[72px] w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-hairline">
                   <Image
@@ -94,7 +115,7 @@ export function RecruiterDrawer() {
                     {profile.name}
                   </h3>
                   <p className="mt-1 font-mono text-xs tracking-[0.2em] text-web-blue-bright uppercase">
-                    {profile.role}
+                    {profile.role} · {profile.location}
                   </p>
                 </div>
               </div>
@@ -102,6 +123,119 @@ export function RecruiterDrawer() {
                 {profile.summary}
               </p>
 
+              {/* 30-second jumps */}
+              <div>
+                <p className="mb-3 font-mono text-[11px] tracking-[0.25em] text-paper-dim uppercase">
+                  Quick Navigation
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {JUMPS.map((j) => (
+                    <a
+                      key={j.href}
+                      href={j.href}
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-1.5 border border-hairline px-3 py-1.5 font-mono text-[11px] tracking-[0.15em] text-paper uppercase transition-colors hover:border-signal-red-bright hover:text-signal-red-bright"
+                    >
+                      {j.label} <ArrowRight size={11} />
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              {/* experience */}
+              <div>
+                <p className="mb-3 font-mono text-[11px] tracking-[0.25em] text-paper-dim uppercase">
+                  Industry Experience
+                </p>
+                {experience.map((e) => (
+                  <div key={e.id} className="border border-hairline p-3">
+                    <p className="font-display text-lg tracking-wide text-paper">
+                      {e.company}
+                    </p>
+                    <p className="font-mono text-[10px] tracking-[0.2em] text-web-blue-bright uppercase">
+                      {e.role}
+                    </p>
+                    <p className="mt-1 text-xs text-paper-dim">{e.points[0]}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* flagship */}
+              <div>
+                <p className="mb-3 font-mono text-[11px] tracking-[0.25em] text-paper-dim uppercase">
+                  Flagship
+                </p>
+                <a
+                  href="#aegisforge"
+                  onClick={() => setOpen(false)}
+                  className="block border border-signal-red/50 bg-signal-red/5 p-3 transition-colors hover:border-signal-red-bright"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-display text-xl tracking-wide text-paper">
+                      {flagship.title}
+                    </span>
+                    <Chip tone="red">Flagship</Chip>
+                  </div>
+                  <p className="mt-1 text-xs leading-relaxed text-paper-dim">
+                    {flagship.oneLiner}
+                  </p>
+                </a>
+              </div>
+
+              {/* other projects */}
+              <div>
+                <p className="mb-3 font-mono text-[11px] tracking-[0.25em] text-paper-dim uppercase">
+                  Other Systems
+                </p>
+                <div className="flex flex-col gap-3">
+                  {rest.map((p) => (
+                    <a
+                      key={p.slug}
+                      href="#missions"
+                      onClick={() => setOpen(false)}
+                      className="group border border-hairline p-3 transition-colors hover:border-signal-red/60"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-display text-lg tracking-wide text-paper">
+                          {p.title}
+                        </span>
+                        <span className="font-mono text-[10px] text-paper-dim">{p.codename}</span>
+                      </div>
+                      <p className="mt-1 text-xs leading-relaxed text-paper-dim">
+                        {p.oneLiner}
+                      </p>
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              {/* skills */}
+              <div>
+                <p className="mb-3 font-mono text-[11px] tracking-[0.25em] text-paper-dim uppercase">
+                  Core Stack
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {TOP_SKILLS.map((s) => (
+                    <Chip key={s}>{s}</Chip>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="mb-3 font-mono text-[11px] tracking-[0.25em] text-paper-dim uppercase">
+                  Full Skill Set
+                </p>
+                <div className="flex flex-col gap-2">
+                  {skillGroups.map((g) => (
+                    <div key={g.id} className="text-xs">
+                      <span className="text-paper-dim">{g.label}: </span>
+                      <span className="text-paper/90">{g.items.join(", ")}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* contact */}
               <div className="grid grid-cols-2 gap-3">
                 <a
                   href={profile.resumeUrl}
@@ -136,63 +270,10 @@ export function RecruiterDrawer() {
 
               <a
                 href={`tel:${profile.phone}`}
-                className="-mt-4 flex items-center gap-2 font-mono text-xs text-paper-dim transition-colors hover:text-paper"
+                className="-mt-3 flex items-center gap-2 font-mono text-xs text-paper-dim transition-colors hover:text-paper"
               >
                 <Phone size={13} /> {profile.phone} · {profile.location}
               </a>
-
-              <div>
-                <p className="mb-3 font-mono text-[11px] tracking-[0.25em] text-paper-dim uppercase">
-                  Flagship Work
-                </p>
-                <div className="flex flex-col gap-3">
-                  {projects.map((p, i) => (
-                    <a
-                      key={p.slug}
-                      href="#missions"
-                      onClick={() => setOpen(false)}
-                      className="group border border-hairline p-3 transition-colors hover:border-signal-red/60"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-display text-lg tracking-wide text-paper">
-                          {String(i + 1).padStart(2, "0")} · {p.title}
-                        </span>
-                        {p.status === "flagship" && (
-                          <Chip tone="red">Flagship</Chip>
-                        )}
-                      </div>
-                      <p className="mt-1 text-xs leading-relaxed text-paper-dim">
-                        {p.oneLiner}
-                      </p>
-                    </a>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <p className="mb-3 font-mono text-[11px] tracking-[0.25em] text-paper-dim uppercase">
-                  Core Stack
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {TOP_SKILLS.map((s) => (
-                    <Chip key={s}>{s}</Chip>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <p className="mb-3 font-mono text-[11px] tracking-[0.25em] text-paper-dim uppercase">
-                  Full Skill Set
-                </p>
-                <div className="flex flex-col gap-2">
-                  {skillGroups.map((g) => (
-                    <div key={g.id} className="text-xs">
-                      <span className="text-paper-dim">{g.label}: </span>
-                      <span className="text-paper/90">{g.items.join(", ")}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </div>
           </motion.div>
         </>

@@ -22,15 +22,19 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://meetjadhav.dev"),
   title: `${profile.name} — ${profile.role}`,
-  description: profile.summary,
+  description:
+    "Meet Jadhav — AI / Backend Engineer building production-grade multi-agent systems: LangGraph orchestration, RAG, LLM evaluation, full observability, and real-time computer vision.",
   keywords: [
     "Meet Jadhav",
     "AI Engineer",
     "Backend Engineer",
-    "LLM Evaluation",
+    "Multi-Agent Systems",
+    "LangGraph",
     "RAG",
+    "LLM Evaluation",
+    "Computer Vision",
     "FastAPI",
-    "Python Developer",
+    "pgvector",
     "Portfolio",
   ],
   authors: [{ name: profile.name, url: profile.github }],

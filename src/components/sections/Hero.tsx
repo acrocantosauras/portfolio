@@ -1,14 +1,83 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useScroll, useTransform } from "motion/react";
-import { ArrowDown, Download } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useMotionValue,
+  useSpring,
+  useReducedMotion,
+} from "motion/react";
+import { ArrowDown, Download, FileText, Code2, Mail } from "lucide-react";
 import { RainCanvas } from "@/components/layout/RainCanvas";
 import { profile } from "@/data/resume";
 import { useRecruiterMode } from "@/components/layout/RecruiterModeContext";
 
+const BOOT_LINES = [
+  "MJSYS v2.6 — initializing",
+  "loading kernel: reasoning.core",
+  "mounting /knowledge /agents /tools",
+  "telemetry: ONLINE",
+  "identity verified",
+];
+
+/** Boot sequence overlay — ~1.4s total, skippable, reduced-motion aware. */
+function BootSequence({ onDone }: { onDone: () => void }) {
+  const [step, setStep] = useState(0);
+  const [exiting, setExiting] = useState(false);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      onDone();
+      return;
+    }
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    BOOT_LINES.forEach((_, i) => {
+      timers.push(setTimeout(() => setStep(i + 1), 120 + i * 180));
+    });
+    timers.push(setTimeout(() => setExiting(true), 120 + BOOT_LINES.length * 180 + 250));
+    timers.push(setTimeout(onDone, 120 + BOOT_LINES.length * 180 + 550));
+    return () => timers.forEach(clearTimeout);
+  }, [onDone]);
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-ink"
+      initial={{ opacity: 1 }}
+      animate={{ opacity: exiting ? 0 : 1 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      aria-hidden
+    >
+      <div className="font-mono text-[11px] leading-6 tracking-[0.15em] text-web-blue-bright/80 sm:text-xs">
+        {BOOT_LINES.slice(0, step).map((line, i) => (
+          <motion.p key={line} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.1 }}>
+            <span className="text-signal-red-bright">{"> "}</span>
+            {line}
+            {i === step - 1 && <span className="ml-1 animate-pulse">▊</span>}
+          </motion.p>
+        ))}
+      </div>
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
+        <div className="h-px w-40 overflow-hidden bg-hairline">
+          <motion.div
+            className="h-full bg-signal-red-bright"
+            initial={{ width: "0%" }}
+            animate={{ width: exiting || step >= BOOT_LINES.length ? "100%" : `${(step / BOOT_LINES.length) * 100}%` }}
+            transition={{ duration: 0.2 }}
+          />
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+const TITLE_LINES = ["MEET", "JADHAV"];
+
 export function Hero() {
   const ref = useRef<HTMLDivElement>(null);
+  const [booted, setBooted] = useState(false);
+  const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -16,6 +85,27 @@ export function Hero() {
   const skylineY = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
   const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "40%"]);
   const contentOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+
+  // cursor-reactive parallax
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const sx = useSpring(mx, { stiffness: 60, damping: 20 });
+  const sy = useSpring(my, { stiffness: 60, damping: 20 });
+  const glowX = useTransform(sx, [-0.5, 0.5], [-30, 30]);
+  const glowY = useTransform(sy, [-0.5, 0.5], [-20, 20]);
+  const titleX = useTransform(sx, [-0.5, 0.5], [12, -12]);
+  const titleY = useTransform(sy, [-0.5, 0.5], [8, -8]);
+
+  useEffect(() => {
+    if (reduceMotion) return;
+    function onMove(e: PointerEvent) {
+      mx.set(e.clientX / window.innerWidth - 0.5);
+      my.set(e.clientY / window.innerHeight - 0.5);
+    }
+    window.addEventListener("pointermove", onMove, { passive: true });
+    return () => window.removeEventListener("pointermove", onMove);
+  }, [mx, my, reduceMotion]);
+
   const { toggle } = useRecruiterMode();
 
   return (
@@ -24,11 +114,27 @@ export function Hero() {
       ref={ref}
       className="relative flex h-[100svh] min-h-[640px] w-full items-end overflow-hidden bg-ink"
     >
+      {!booted && <BootSequence onDone={() => setBooted(true)} />}
+
       {/* atmosphere */}
       <div className="absolute inset-0" aria-hidden>
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,#151622_0%,#08080a_60%)]" />
-        <div className="absolute top-0 left-[8%] h-[520px] w-[520px] -translate-y-1/3 animate-pulse-slow rounded-full bg-signal-red/20 blur-[120px]" />
-        <div className="absolute top-0 right-[6%] h-[560px] w-[560px] -translate-y-1/4 animate-pulse-slow rounded-full bg-web-blue/25 blur-[130px] [animation-delay:1.5s]" />
+        <motion.div
+          style={{ x: glowX, y: glowY }}
+          className="absolute top-0 left-[8%] h-[520px] w-[520px] -translate-y-1/3 animate-pulse-slow rounded-full bg-signal-red/20 blur-[120px]"
+        />
+        <motion.div
+          style={{ x: glowX, y: glowY }}
+          className="absolute top-0 right-[6%] h-[560px] w-[560px] -translate-y-1/4 animate-pulse-slow rounded-full bg-web-blue/25 blur-[130px] [animation-delay:1.5s]"
+        />
+        {/* technical grid */}
+        <div
+          className="absolute inset-0 opacity-[0.05]"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(90deg, var(--color-paper) 0, var(--color-paper) 1px, transparent 1px, transparent 80px), repeating-linear-gradient(0deg, var(--color-paper) 0, var(--color-paper) 1px, transparent 1px, transparent 80px)",
+          }}
+        />
       </div>
 
       <motion.div style={{ y: skylineY }} className="absolute inset-x-0 bottom-0" aria-hidden>
@@ -42,55 +148,114 @@ export function Hero() {
         style={{ y: contentY, opacity: contentOpacity }}
         className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-20 sm:px-8 sm:pb-28"
       >
-        <div className="mb-6 flex items-center gap-3 font-mono text-[11px] tracking-[0.3em] text-paper-dim uppercase">
-          <span className="border border-hairline px-2 py-1">Issue №01</span>
-          <span>{profile.location}</span>
-          <span className="h-1 w-1 rounded-full bg-signal-red-bright" />
-          <span>Status: Building</span>
-        </div>
+        <motion.div
+          initial={false}
+          animate={booted ? "show" : "hidden"}
+          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.12, delayChildren: 0.05 } } }}
+          className="mb-6 flex items-center gap-3 font-mono text-[11px] tracking-[0.3em] text-paper-dim uppercase"
+        >
+          <motion.span
+            variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }}
+            className="border border-hairline px-2 py-1"
+          >
+            SYS.001
+          </motion.span>
+          <motion.span variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }}>
+            {profile.location}
+          </motion.span>
+          <motion.span variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-1.5">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            </span>
+            Systems Online
+          </motion.span>
+        </motion.div>
 
-        <h1 className="font-display text-[16vw] leading-[0.82] tracking-wide text-paper sm:text-[10vw] md:text-[8rem] lg:text-[9.5rem]">
-          MEET
-          <br />
-          <span className="text-signal-red-bright">JADHAV</span>
-        </h1>
+        <motion.h1
+          style={{ x: titleX, y: titleY }}
+          className="font-display text-[19vw] leading-[0.82] tracking-wide text-paper sm:text-[13vw] md:text-[10rem] lg:text-[12rem]"
+          aria-label="Meet Jadhav"
+        >
+          {TITLE_LINES.map((line, li) => (
+            <span key={line} className="block overflow-hidden" aria-hidden>
+              <motion.span
+                className={li === 1 ? "block text-signal-red-bright" : "block"}
+                initial={{ y: "110%" }}
+                animate={booted ? { y: "0%" } : { y: "110%" }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 + li * 0.14 }}
+              >
+                {line}
+              </motion.span>
+            </span>
+          ))}
+        </motion.h1>
 
-        <div className="mt-6 flex flex-col gap-4 sm:mt-8 sm:flex-row sm:items-end sm:justify-between">
+        <motion.div
+          initial={false}
+          animate={booted ? "show" : "hidden"}
+          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }}
+          className="mt-6 flex flex-col gap-4 sm:mt-8 sm:flex-row sm:items-end sm:justify-between"
+        >
           <div>
-            <p className="font-mono text-sm tracking-[0.25em] text-web-blue-bright uppercase sm:text-base">
+            <motion.p
+              variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }}
+              className="font-mono text-sm tracking-[0.25em] text-web-blue-bright uppercase sm:text-base"
+            >
               {profile.role}
-            </p>
-            <p className="mt-2 max-w-md text-sm text-paper-dim sm:text-base">
+            </motion.p>
+            <motion.p
+              variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }}
+              className="mt-2 max-w-md text-sm text-paper-dim sm:text-base"
+            >
               {profile.tagline}
-            </p>
+            </motion.p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <motion.div variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }} className="flex flex-wrap gap-3">
             <a
-              href="#missions"
+              href="#work"
               data-sense="true"
               className="border-2 border-paper bg-paper px-5 py-3 font-mono text-xs font-semibold tracking-[0.2em] text-ink uppercase transition-colors hover:bg-signal-red-bright hover:border-signal-red-bright hover:text-paper"
             >
-              View Missions
+              View Work
+            </a>
+            <a
+              href={profile.github}
+              target="_blank"
+              rel="noreferrer"
+              data-sense="true"
+              aria-label="GitHub profile"
+              className="flex items-center gap-2 border-2 border-hairline px-4 py-3 font-mono text-xs tracking-[0.2em] text-paper uppercase transition-colors hover:border-web-blue-bright hover:text-web-blue-bright"
+            >
+              <Code2 size={14} /> GitHub
+            </a>
+            <a
+              href={profile.resumeUrl}
+              download
+              data-sense="true"
+              className="flex items-center gap-2 border-2 border-hairline px-4 py-3 font-mono text-xs tracking-[0.2em] text-paper uppercase transition-colors hover:border-signal-red-bright hover:text-signal-red-bright"
+            >
+              <Download size={14} /> Resume
+            </a>
+            <a
+              href={`mailto:${profile.email}`}
+              data-sense="true"
+              aria-label="Email Meet Jadhav"
+              className="flex items-center gap-2 border-2 border-hairline px-4 py-3 font-mono text-xs tracking-[0.2em] text-paper uppercase transition-colors hover:border-signal-red-bright hover:text-signal-red-bright"
+            >
+              <Mail size={14} /> Contact
             </a>
             <button
               type="button"
               onClick={toggle}
               data-sense="true"
-              className="flex items-center gap-2 border-2 border-hairline px-5 py-3 font-mono text-xs tracking-[0.2em] text-paper uppercase transition-colors hover:border-web-blue-bright hover:text-web-blue-bright"
+              className="flex items-center gap-2 border-2 border-signal-red/70 bg-signal-red/10 px-4 py-3 font-mono text-xs tracking-[0.2em] text-signal-red-bright uppercase transition-colors hover:bg-signal-red/25"
             >
-              Recruiter Mode
+              <FileText size={14} /> Recruiter
             </button>
-            <a
-              href={profile.resumeUrl}
-              download
-              data-sense="true"
-              className="flex items-center gap-2 border-2 border-hairline px-5 py-3 font-mono text-xs tracking-[0.2em] text-paper uppercase transition-colors hover:border-signal-red-bright hover:text-signal-red-bright"
-            >
-              <Download size={14} /> Resume
-            </a>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </motion.div>
 
       <motion.div

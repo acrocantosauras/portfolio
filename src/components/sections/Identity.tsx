@@ -8,22 +8,16 @@ import { profile } from "@/data/resume";
 
 const STATS = [
   { label: "Base of Operations", value: profile.location },
-  { label: "Focus", value: "AI Systems / Backend" },
+  { label: "Focus", value: "Multi-Agent AI / Backend" },
   { label: "Certification", value: "Azure AI-900" },
   { label: "Grad Year", value: "2025 (B.E., E&TC)" },
-];
-
-const CAPTIONS = [
-  "Graduated 2025 with a B.E. in Electronics & Telecommunication — then went straight into building full-stack and backend systems in Python, not because a class required it, but because the problems were interesting.",
-  "The pattern that keeps showing up: RAG pipelines, LLM evaluation, quality gates. Systems that don't just generate answers — systems that can prove the answers are good.",
-  "Comfortable across the whole stack: APIs, databases, testing, deployment. Built on a foundation of data structures, algorithms, and OOP that doesn't wobble under pressure.",
 ];
 
 export function Identity() {
   return (
     <section id="identity" className="relative bg-ink py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
-        <SectionHeading eyebrow="File 002 / Identity" title="ORIGIN FILE" />
+        <SectionHeading eyebrow="About / The Engineer" title="ORIGIN FILE" />
 
         <div className="mt-14 grid grid-cols-1 gap-8 lg:grid-cols-[0.85fr_1.15fr]">
           <motion.div
@@ -57,7 +51,7 @@ export function Identity() {
           </motion.div>
 
           <div className="flex flex-col justify-center gap-5">
-            {CAPTIONS.map((text, i) => (
+            {profile.identity.map((text, i) => (
               <motion.p
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
@@ -69,6 +63,25 @@ export function Identity() {
                 {text}
               </motion.p>
             ))}
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="mt-2 flex flex-wrap gap-2"
+            >
+              {["Multi-Agent Systems", "RAG", "LLM Evaluation", "Computer Vision", "Observability"].map(
+                (t) => (
+                  <span
+                    key={t}
+                    className="border border-hairline bg-ink-soft/60 px-2.5 py-1 font-mono text-[10px] tracking-[0.15em] text-paper-dim uppercase"
+                  >
+                    {t}
+                  </span>
+                )
+              )}
+            </motion.div>
           </div>
         </div>
         <WebDivider className="mt-16" />

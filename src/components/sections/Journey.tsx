@@ -1,28 +1,77 @@
 "use client";
 
 import { motion } from "motion/react";
-import { GraduationCap, Award, Briefcase } from "lucide-react";
+import { GraduationCap, Award, Building2, FolderGit2 } from "lucide-react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { timeline } from "@/data/resume";
+import { certifications, experience } from "@/data/resume";
 import { cn } from "@/lib/utils";
 
-const ICONS = {
-  education: GraduationCap,
-  certification: Award,
-  experience: Briefcase,
-} as const;
+const uchit = experience.find((e) => e.id === "uchit")!;
 
-const TONE = {
-  education: "blue",
-  certification: "red",
-  experience: "red",
-} as const;
+type Entry = {
+  id: string;
+  icon: typeof GraduationCap;
+  period: string;
+  title: string;
+  org: string;
+  location?: string;
+  detail?: string;
+  tone: "red" | "blue";
+};
+
+const ENTRIES: Entry[] = [
+  {
+    id: "uchit",
+    icon: Building2,
+    period: "Industry Experience",
+    title: uchit.role,
+    org: uchit.company,
+    location: uchit.location,
+    detail: uchit.points[0],
+    tone: "red",
+  },
+  {
+    id: "independent",
+    icon: FolderGit2,
+    period: "Aug 2025 – Present",
+    title: "Independent Systems Buildout",
+    org: "Self-directed",
+    detail: "AegisForge, LLM Evaluation Platform, AI Knowledge Assistant, J.A.R.V.I.S. — designed, built and hardened solo.",
+    tone: "red",
+  },
+  {
+    id: "edu-degree",
+    icon: GraduationCap,
+    period: "Aug 2021 – May 2025",
+    title: "B.E., Electronics & Telecommunication",
+    org: "Shrimati Kashibai Navale College of Engineering",
+    location: "Pune, Maharashtra",
+    tone: "blue",
+  },
+  {
+    id: "edu-highschool",
+    icon: GraduationCap,
+    period: "2021",
+    title: "Higher Secondary (Science) — 86.66%",
+    org: "MGSK Gujarati High School",
+    location: "Sangli, Maharashtra",
+    tone: "blue",
+  },
+  ...certifications.map((c, i) => ({
+    id: `cert-${i}`,
+    icon: Award,
+    period: c.org,
+    title: c.title,
+    org: "Certification",
+    tone: "blue" as const,
+  })),
+];
 
 export function Journey() {
   return (
     <section id="journey" className="relative bg-ink-soft py-24 sm:py-32">
       <div className="mx-auto max-w-5xl px-5 sm:px-8">
-        <SectionHeading eyebrow="File 003 / Case Board" title="THE JOURNEY" />
+        <SectionHeading eyebrow="Timeline / Service Record" title="THE JOURNEY" />
 
         <div className="relative mt-16">
           <div
@@ -31,9 +80,8 @@ export function Journey() {
           />
 
           <ol className="flex flex-col gap-10">
-            {timeline.map((item, i) => {
-              const Icon = ICONS[item.kind];
-              const tone = TONE[item.kind];
+            {ENTRIES.map((item, i) => {
+              const Icon = item.icon;
               const alignRight = i % 2 === 1;
               return (
                 <motion.li
@@ -50,7 +98,9 @@ export function Journey() {
                   <div
                     className={cn(
                       "absolute top-1 left-0 z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 bg-ink sm:left-1/2 sm:-translate-x-1/2",
-                      tone === "red" ? "border-signal-red-bright text-signal-red-bright" : "border-web-blue-bright text-web-blue-bright"
+                      item.tone === "red"
+                        ? "border-signal-red-bright text-signal-red-bright"
+                        : "border-web-blue-bright text-web-blue-bright"
                     )}
                   >
                     <Icon size={16} />
@@ -62,7 +112,7 @@ export function Journey() {
                     <div
                       className={cn(
                         "inline-block w-full border border-hairline bg-ink-panel/70 p-4 text-left sm:max-w-md",
-                        tone === "red" ? "hover:border-signal-red/60" : "hover:border-web-blue/60",
+                        item.tone === "red" ? "hover:border-signal-red/60" : "hover:border-web-blue/60",
                         "transition-colors"
                       )}
                     >
@@ -76,14 +126,8 @@ export function Journey() {
                         {item.org}
                         {item.location ? ` · ${item.location}` : ""}
                       </p>
-                      {item.bullets && (
-                        <ul className="mt-2 flex flex-col gap-1.5">
-                          {item.bullets.map((b, bi) => (
-                            <li key={bi} className="text-xs leading-relaxed text-paper/85">
-                              {b}
-                            </li>
-                          ))}
-                        </ul>
+                      {item.detail && (
+                        <p className="mt-2 text-xs leading-relaxed text-paper/85">{item.detail}</p>
                       )}
                     </div>
                   </div>
