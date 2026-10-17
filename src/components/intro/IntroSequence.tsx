@@ -113,9 +113,33 @@ export function IntroProvider({ children }: { children: ReactNode }) {
   const active = override !== null ? override : initSeen === false;
   const done = override !== null ? !override : initSeen === true;
 
+  // Deep-link guard: if the page was opened with a #section and the intro
+  // locked scrolling before the browser could honor the fragment, restore the
+  // target once, right after the lock releases. Guarded so replays never yank
+  // the visitor away from wherever they are.
+  const hashRestoredRef = useRef(false);
+
   const finish = useCallback(() => {
     writeSeen();
     setOverride(false);
+    if (!hashRestoredRef.current) {
+      hashRestoredRef.current = true;
+      const hash = window.location.hash.replace(/^#/, "");
+      if (hash) {
+        window.setTimeout(() => {
+          const target = document.getElementById(decodeURIComponent(hash));
+          if (target && window.scrollY < 8) {
+            const reduce = window.matchMedia(
+              "(prefers-reduced-motion: reduce)"
+            ).matches;
+            target.scrollIntoView({
+              behavior: reduce ? "auto" : "smooth",
+              block: "start",
+            });
+          }
+        }, 120);
+      }
+    }
   }, []);
 
   const replay = useCallback(() => {

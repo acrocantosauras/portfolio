@@ -140,6 +140,7 @@ export function Hero() {
           </motion.button>
         </motion.div>
 
+        <div className="relative">
         <h1
           className="ns-fix font-display text-[19vw] leading-[0.86] tracking-wide sm:text-[13vw] md:text-[10rem] lg:text-[12rem]"
           aria-label="Meet Jadhav"
@@ -168,6 +169,16 @@ export function Hero() {
             ))}
           </span>
         </h1>
+        {/* one-shot cinematic light sweep across the masthead once the intro resolves */}
+        {done && !reduceMotion && (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 overflow-hidden"
+          >
+            <span className="masthead-sweep" />
+          </span>
+        )}
+        </div>
 
         <motion.div
           initial={false}

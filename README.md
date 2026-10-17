@@ -53,6 +53,10 @@ VERIFY_URL=https://example.com node .shots/verify.mjs
 
 All checks must report `PASS` (exit code 0).
 
+`node .shots/deeplink.mjs` is a companion suite for hash navigation: deep links
+(`/#section`) surviving the intro's scroll lock, heading clearance below the
+sticky header, nav/back-forward behavior, and reduced-motion deep links.
+
 ## Getting Started
 
 First, run the development server:

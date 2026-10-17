@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { DisplayTitle } from "@/components/ui/DisplayTitle";
 import { Chip } from "@/components/ui/Chip";
 import { WebCorner } from "@/components/ui/WebCorner";
 import { experience } from "@/data/resume";
@@ -157,8 +158,15 @@ export function UchitVision() {
               )}
 
               {/* tracked boxes + trails */}
-              {PEOPLE.map((p) => (
-                <div key={p.id}>
+              {PEOPLE.map((p, i) => (
+                <motion.div
+                  key={p.id}
+                  className="absolute inset-0"
+                  initial={reduceMotion ? false : { opacity: 0, scale: 1.12 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true, margin: "-40px" }}
+                  transition={{ duration: 0.55, delay: 0.25 + i * 0.12, ease: "easeOut" }}
+                >
                   {/* heading trail */}
                   <span
                     className="pointer-events-none absolute border-t border-dashed border-emerald-400/30"
@@ -182,7 +190,7 @@ export function UchitVision() {
                     {/* head indicator */}
                     <span className="absolute top-[8%] left-1/2 h-[18%] w-[26%] -translate-x-1/2 border border-emerald-400/50" aria-hidden />
                   </motion.div>
-                </div>
+                </motion.div>
               ))}
 
               {/* center crosshair */}
@@ -236,9 +244,11 @@ export function UchitVision() {
           {/* ---- description ---- */}
           <div className="flex flex-col justify-center gap-5">
             <div>
-              <p className="font-display text-2xl tracking-wide text-paper sm:text-3xl">
-                Cameras in, decisions out.
-              </p>
+              <DisplayTitle
+                as="p"
+                text="Cameras in, decisions out."
+                className="text-2xl sm:text-3xl"
+              />
               <p className="mt-3 text-sm leading-relaxed text-paper-dim sm:text-base">
                 Real-time video analytics pipelines: CCTV in, structured understanding out —
                 detection, tracking, counting, and occupancy reporting that stays readable to the
@@ -265,13 +275,19 @@ export function UchitVision() {
               return (
                 <li key={stage} className="flex flex-col gap-1 sm:flex-1 sm:flex-row sm:items-center">
                   <div
-                    className={`border px-4 py-3 text-center font-mono text-[11px] font-bold tracking-[0.2em] transition-colors duration-300 sm:flex-1 ${
+                    className={`relative border px-4 py-3 text-center font-mono text-[11px] font-bold tracking-[0.2em] transition-colors duration-300 sm:flex-1 ${
                       active
                         ? "border-emerald-400 bg-emerald-400/10 text-emerald-400"
                         : "border-hairline text-paper-dim"
                     }`}
                   >
                     {stage}
+                    {active && !reduceMotion && (
+                      <span
+                        className="absolute top-1.5 right-1.5 h-1 w-1 rounded-full bg-emerald-400"
+                        aria-hidden
+                      />
+                    )}
                   </div>
                   {i < PIPELINE.length - 1 && (
                     <span className={`mx-2 hidden h-px w-6 sm:block ${i < activePipe ? "bg-emerald-400" : "bg-hairline"}`} aria-hidden />

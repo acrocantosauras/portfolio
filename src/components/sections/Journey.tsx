@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { GraduationCap, Award, Building2, FolderGit2 } from "lucide-react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { certifications, experience } from "@/data/resume";
@@ -68,6 +68,8 @@ const ENTRIES: Entry[] = [
 ];
 
 export function Journey() {
+  const reduceMotion = useReducedMotion();
+
   return (
     <section id="journey" className="relative bg-ink-soft py-24 sm:py-32">
       <div className="mx-auto max-w-5xl px-5 sm:px-8">
@@ -75,9 +77,18 @@ export function Journey() {
 
         <div className="relative mt-16">
           <div
-            className="absolute top-0 bottom-0 left-[19px] w-px bg-gradient-to-b from-signal-red via-hairline to-web-blue sm:left-1/2 sm:-translate-x-1/2"
+            className="absolute top-0 bottom-0 left-[19px] w-px sm:left-1/2 sm:-translate-x-1/2"
             aria-hidden
-          />
+          >
+            {/* the strand draws itself down the timeline as it enters view */}
+            <motion.div
+              initial={reduceMotion ? false : { scaleY: 0 }}
+              whileInView={{ scaleY: 1 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 1.3, ease: "easeInOut" }}
+              className="h-full w-full origin-top bg-gradient-to-b from-signal-red via-hairline to-web-blue"
+            />
+          </div>
 
           <ol className="flex flex-col gap-10">
             {ENTRIES.map((item, i) => {
@@ -103,7 +114,20 @@ export function Journey() {
                         : "border-web-blue-bright text-web-blue-bright"
                     )}
                   >
-                    <Icon size={16} />
+                    <motion.span
+                      className="flex items-center justify-center"
+                      initial={reduceMotion ? false : { scale: 0.3, opacity: 0 }}
+                      whileInView={{ scale: 1, opacity: 1 }}
+                      viewport={{ once: true, margin: "-100px" }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 320,
+                        damping: 18,
+                        delay: 0.15 + (i % 4) * 0.08,
+                      }}
+                    >
+                      <Icon size={16} />
+                    </motion.span>
                   </div>
 
                   <div className={cn("hidden sm:block", alignRight && "sm:order-2")} />

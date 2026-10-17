@@ -33,10 +33,10 @@ export function Missions() {
         <div className="mt-14 flex flex-col gap-5">
           {/* flagship row — reduced weight since AegisForge has its own section */}
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 24, rotateX: 4, transformPerspective: 900 }}
+            whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
             viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.55 }}
           >
             <MissionCard project={aegis} compact onOpen={setActive} />
           </motion.div>
@@ -44,8 +44,8 @@ export function Missions() {
             {rest.map((p, i) => (
               <motion.div
                 key={p.slug}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 24, rotateX: 5, transformPerspective: 900 }}
+                whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
                 viewport={{ once: true, margin: "-60px" }}
                 transition={{ duration: 0.5, delay: (i % 2) * 0.08 }}
               >
@@ -100,6 +100,15 @@ function MissionCard({
       {/* ghost architecture visual */}
       <MiniArchitecture project={project} />
 
+      {/* web-thread corner on the flagship row */}
+      {compact && (
+        <WebCorner
+          anchor="tr"
+          className="pointer-events-none absolute top-1 right-1 hidden h-24 w-24 text-paper/[0.05] sm:block"
+          strokeWidth={0.8}
+        />
+      )}
+
       <div className="relative">
         <div className="flex items-center justify-between gap-3">
           <p className="font-mono text-[10px] tracking-[0.3em] text-paper-dim uppercase">
@@ -123,8 +132,10 @@ function MissionCard({
         <div className="mt-2 flex flex-wrap items-baseline gap-x-3">
           <h3
             className={cn(
-              "font-display tracking-wide text-paper transition-colors group-hover:text-signal-red-bright",
-              compact ? "text-3xl sm:text-5xl" : "text-2xl sm:text-3xl"
+              "font-display tracking-wide transition-colors group-hover:text-signal-red-bright",
+              compact
+                ? "masthead-sm text-3xl sm:text-5xl"
+                : "text-2xl text-paper sm:text-3xl"
             )}
           >
             {project.title}

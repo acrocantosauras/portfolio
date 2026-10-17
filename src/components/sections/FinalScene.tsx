@@ -61,7 +61,7 @@ export function FinalScene() {
           SYSTEM <span className="masthead-sm">STANDING BY</span>
         </h2>
         <p className="gold-subtitle mt-4 inline-block -skew-x-12 font-mono text-xs tracking-[0.35em] uppercase sm:text-sm">
-          Same city · Brand new day
+          Signal held · Building what&rsquo;s next
         </p>
 
         {/* footer nav */}

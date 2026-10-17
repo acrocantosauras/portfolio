@@ -33,11 +33,16 @@ export function Workshop() {
               transition={{ duration: 0.5, delay: (i % 2) * 0.08 }}
               className="group relative border border-hairline bg-ink-panel/60 p-5 transition-colors hover:border-signal-red/50 sm:p-6"
             >
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="font-display text-2xl tracking-wide text-paper sm:text-3xl">
-                  {group.label}
-                </h3>
-                <span className="font-mono text-[10px] text-paper-dim">
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-mono text-[10px] tracking-[0.3em] text-web-blue-bright uppercase">
+                    MOD.{String(i + 1).padStart(2, "0")}
+                  </p>
+                  <h3 className="mt-1 font-display text-2xl tracking-wide text-paper sm:text-3xl">
+                    {group.label}
+                  </h3>
+                </div>
+                <span className="mt-1 shrink-0 font-mono text-[10px] text-paper-dim">
                   {String(group.items.length).padStart(2, "0")} modules
                 </span>
               </div>
@@ -73,7 +78,10 @@ export function Workshop() {
               viewport={{ once: true, margin: "-40px" }}
               transition={{ duration: 0.4, delay: i * 0.05 }}
               className={cn(
-                "flex flex-col gap-2 border border-hairline bg-ink-panel/40 px-5 py-3.5 sm:flex-row sm:items-center sm:gap-6"
+                "flex flex-col gap-2 border border-l-2 border-hairline bg-ink-panel/40 px-5 py-3.5 transition-colors sm:flex-row sm:items-center sm:gap-6",
+                i % 2 === 0
+                  ? "border-l-signal-red/60"
+                  : "border-l-web-blue-bright/50"
               )}
             >
               <span className="w-40 shrink-0 font-mono text-[11px] tracking-[0.25em] text-paper-dim uppercase">

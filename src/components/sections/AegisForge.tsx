@@ -92,6 +92,11 @@ export function AegisForge() {
         className="absolute -top-4 -left-4 h-[34vmin] w-[34vmin] text-paper/[0.07]"
         strokeWidth={0.7}
       />
+      <WebCorner
+        anchor="br"
+        className="absolute -right-4 -bottom-4 hidden h-[26vmin] w-[26vmin] text-web-blue-bright/[0.05] lg:block"
+        strokeWidth={0.7}
+      />
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.05]"
         style={{
@@ -140,7 +145,14 @@ export function AegisForge() {
         </p>
 
         {/* ---- request-lifecycle pipeline ---- */}
-        <div ref={diagramRef} className="mt-16 border border-hairline bg-ink-panel/40 p-5 sm:p-8">
+        <motion.div
+          ref={diagramRef}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.6 }}
+          className="mt-16 border border-hairline bg-ink-panel/40 p-5 sm:p-8"
+        >
           <div className="mb-6 flex flex-wrap items-center justify-between gap-2 font-mono text-[10px] tracking-[0.3em] text-paper-dim uppercase">
             <span>workflow.pipeline — request lifecycle</span>
             <span className="hidden lg:inline">
@@ -202,7 +214,7 @@ export function AegisForge() {
                 const isLit = i < activeIdx;
                 const [l1, l2] = wrapLabel(stage.label);
                 return (
-                  <g
+                  <motion.g
                     key={stage.id}
                     role="button"
                     tabIndex={0}
@@ -217,6 +229,10 @@ export function AegisForge() {
                     }}
                     className="cursor-pointer"
                     data-sense="true"
+                    initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-60px" }}
+                    transition={{ duration: 0.45, delay: 0.15 + i * 0.09, ease: "easeOut" }}
                   >
                     <rect
                       x={x}
@@ -311,7 +327,7 @@ export function AegisForge() {
                       strokeWidth={1}
                       className="opacity-0 focus-visible:opacity-100"
                     />
-                  </g>
+                  </motion.g>
                 );
               })}
             </svg>
@@ -395,7 +411,7 @@ export function AegisForge() {
             * conceptual simulation of the request lifecycle — representative of the architecture,
             not a live production connection.
           </p>
-        </div>
+        </motion.div>
 
         {/* ---- agent graph ---- */}
         <div className="mt-14">
