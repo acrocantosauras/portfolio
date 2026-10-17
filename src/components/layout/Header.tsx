@@ -87,6 +87,12 @@ export function Header() {
                 active === item.href ? "text-signal-red-bright" : "text-paper-dim hover:text-paper"
               )}
             >
+              {active === item.href && (
+                <span
+                  className="absolute top-1/2 -left-3 h-1 w-1 -translate-y-1/2 animate-pulse-slow rounded-full bg-signal-red-bright"
+                  aria-hidden
+                />
+              )}
               {item.label}
               {active === item.href && (
                 <motion.span

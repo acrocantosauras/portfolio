@@ -76,7 +76,7 @@ export function AegisForge() {
 
   const displayStatus = reduceMotion ? 2 : statusIndex;
   const activeIdx = reduceMotion ? aegisStages.length : (pinned ?? auto);
-  const selected = aegisStages[Math.min(pinned ?? auto, aegisStages.length - 1)];
+  const selected = aegisStages[Math.max(0, Math.min(pinned ?? auto, aegisStages.length - 1))];
   const active = aegisAgents.find((a) => a.id === activeAgent) ?? null;
 
   function selectStage(i: number) {
@@ -386,8 +386,7 @@ export function AegisForge() {
               transition={{ duration: 0.2 }}
             >
               <p className="font-mono text-[10px] tracking-[0.25em] text-signal-red-bright uppercase">
-                STAGE {String(aegisStages.indexOf(selected) + 1).padStart(2, "0")} — {selected.label}{" "}
-                <span className="text-paper-dim">/ {selected.sub}</span>
+                STAGE {String(aegisStages.indexOf(selected) + 1).padStart(2, "0")} — {selected.label}
               </p>
               <p className="mt-1 text-sm text-paper/90">{selected.detail}</p>
             </motion.div>

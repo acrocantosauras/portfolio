@@ -1,15 +1,31 @@
 @import "tailwindcss";
 
+/*
+  Design system — "Brand New Day" direction.
+  Grounded in official promo material for Spider-Man: Brand New Day (Sony, 2026):
+  - Title treatment: flat comic RED faces with a ROYAL BLUE 3D depth block, thin dark
+    outline, arced baseline; a warm GOLD subtitle layer beneath (FontVibe analysis of
+    the official logo, Jul 2026).
+  - Suit: handmade, raised black web lines over a richer textured red; red dominant,
+    blue supporting, black webbing detail (official suit-vignette coverage).
+  - Backdrop: rain-slick, grounded night-city Manhattan; wide shots that isolate the
+    hero (trailer breakdowns, No Film School / Nexus Point News).
+  - Themes: isolation, a fresh start, heightened spider-sense.
+  All artwork on this site is original — no film stills or third-party assets.
+*/
+
 :root {
-  --color-ink: #08080a;
-  --color-ink-soft: #101014;
-  --color-ink-panel: #131317;
-  --color-paper: #ece6d8;
-  --color-paper-dim: #b9b3a4;
-  --color-signal-red: #d81f2c;
-  --color-signal-red-bright: #ff2e3d;
-  --color-web-blue: #2647c9;
-  --color-web-blue-bright: #3f63f0;
+  --color-ink: #06070b; /* rain-slick night */
+  --color-ink-soft: #0b0d14;
+  --color-ink-panel: #11141f;
+  --color-paper: #ece6d8; /* bone, for readable copy */
+  --color-paper-dim: #b6b1a6;
+  --color-signal-red: #e01f2f; /* comic red — masthead face */
+  --color-signal-red-bright: #ff3543;
+  --color-web-blue: #2440cc; /* royal blue — depth block */
+  --color-web-blue-bright: #4567ff;
+  --color-gold: #f0b537; /* subtitle accent, sparingly */
+  --color-gold-dim: rgba(240, 181, 55, 0.55);
   --color-amber: #e8a83c;
   --color-hairline: rgba(236, 230, 216, 0.14);
 }
@@ -24,6 +40,8 @@
   --color-signal-red-bright: var(--color-signal-red-bright);
   --color-web-blue: var(--color-web-blue);
   --color-web-blue-bright: var(--color-web-blue-bright);
+  --color-gold: var(--color-gold);
+  --color-gold-dim: var(--color-gold-dim);
   --color-amber: var(--color-amber);
   --color-hairline: var(--color-hairline);
   --font-display: var(--font-display);
@@ -33,6 +51,9 @@
   --animate-drift: drift 40s linear infinite;
   --animate-pulse-slow: pulse-slow 3s ease-in-out infinite;
   --animate-marquee: marquee 30s linear infinite;
+  --animate-dust: dust 14s linear infinite;
+  --animate-spin-slow: spin 9s linear infinite;
+  --animate-blink: blink 1.6s steps(1, end) infinite;
 }
 
 html {
@@ -118,6 +139,64 @@ body {
   box-shadow: 5px 5px 0 0 var(--color-web-blue);
 }
 
+/* ---- Masthead (title-treatment) utilities ----
+   Red face sitting on a royal-blue depth block, thin dark outline —
+   echoing the official red-and-blue comic masthead. */
+.masthead {
+  color: var(--color-signal-red-bright);
+  -webkit-text-stroke: 1.5px rgba(4, 4, 8, 0.9);
+  paint-order: stroke fill;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.85),
+    3px 5px 0 var(--color-web-blue),
+    6px 9px 0 rgba(0, 0, 0, 0.5);
+}
+
+.masthead-sm {
+  color: var(--color-signal-red-bright);
+  -webkit-text-stroke: 0.8px rgba(4, 4, 8, 0.9);
+  paint-order: stroke fill;
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.85),
+    2px 3px 0 var(--color-web-blue);
+}
+
+.gold-subtitle {
+  color: var(--color-gold);
+  font-style: italic;
+  letter-spacing: 0.22em;
+}
+
+/* red→blue rim lighting used on panels and silhouettes */
+.rim-red {
+  box-shadow:
+    inset 3px 0 0 -1px rgba(224, 31, 47, 0.55),
+    -18px 0 44px -24px rgba(224, 31, 47, 0.7);
+}
+
+.rim-blue {
+  box-shadow:
+    inset -3px 0 0 -1px rgba(36, 64, 204, 0.6),
+    18px 0 44px -24px rgba(36, 64, 204, 0.75);
+}
+
+/* raised-web texture: thin dark web lines over a surface, used sparingly */
+.suit-weave {
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      rgba(0, 0, 0, 0.35) 0 1px,
+      transparent 1px 9px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(0, 0, 0, 0.35) 0 1px,
+      transparent 1px 9px
+    );
+}
+
+/* ---- Keyframes ---- */
+
 @keyframes flicker {
   0%,
   19%,
@@ -165,4 +244,72 @@ body {
   to {
     transform: translateX(-50%);
   }
+}
+
+@keyframes dust {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.7;
+  }
+  90% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate3d(-40px, -160px, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes blink {
+  0%,
+  60% {
+    opacity: 1;
+  }
+  61%,
+  100% {
+    opacity: 0.25;
+  }
+}
+
+@keyframes sweep {
+  0% {
+    transform: translateX(-130%) skewX(-16deg);
+  }
+  100% {
+    transform: translateX(230%) skewX(-16deg);
+  }
+}
+
+/* pipeline signal traces — dashes running along a path (SVG) */
+@keyframes dash-run {
+  to {
+    stroke-dashoffset: -36;
+  }
+}
+
+.trace-run {
+  stroke-dasharray: 7 11;
+  animation: dash-run 1.3s linear infinite;
+}
+
+/* vertical counterpart for stacked layouts */
+@keyframes drop {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(26px);
+    opacity: 0;
+  }
+}
+
+.trace-drop {
+  animation: drop 1.3s linear infinite;
 }

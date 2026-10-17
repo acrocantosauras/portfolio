@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import { ArrowUpRight, Boxes } from "lucide-react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Chip } from "@/components/ui/Chip";
+import { WebCorner } from "@/components/ui/WebCorner";
 import { projects, type Project } from "@/data/resume";
 import { ProjectDossier } from "./ProjectDossier";
 import { cn } from "@/lib/utils";
@@ -15,8 +16,13 @@ export function Missions() {
   const [aegis, ...rest] = projects;
 
   return (
-    <section id="missions" className="relative bg-ink-soft py-24 sm:py-32">
-      <div className="mx-auto max-w-7xl px-5 sm:px-8">
+    <section id="missions" className="relative overflow-hidden bg-ink-soft py-24 sm:py-32">
+      <WebCorner
+        anchor="br"
+        className="absolute -right-4 -bottom-4 h-[32vmin] w-[32vmin] text-signal-red/[0.07]"
+        strokeWidth={0.7}
+      />
+      <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <SectionHeading eyebrow="SYS / Index" title="SYSTEM REGISTRY" />
           <p className="font-mono text-[11px] tracking-[0.3em] text-paper-dim uppercase">

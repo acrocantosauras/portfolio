@@ -3,6 +3,7 @@
 import { motion } from "motion/react";
 import { Mail, Phone, Code2, Link2, MapPin, ArrowUpRight } from "lucide-react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { WebCorner } from "@/components/ui/WebCorner";
 import { profile } from "@/data/resume";
 
 const CHANNELS = [
@@ -15,6 +16,16 @@ const CHANNELS = [
 export function Contact() {
   return (
     <section id="contact" className="relative overflow-hidden bg-ink-soft py-28 sm:py-36">
+      <WebCorner
+        anchor="tl"
+        className="absolute -top-4 -left-4 h-[34vmin] w-[34vmin] text-paper/[0.06]"
+        strokeWidth={0.7}
+      />
+      <WebCorner
+        anchor="br"
+        className="absolute -right-4 -bottom-4 h-[26vmin] w-[26vmin] text-signal-red/[0.08]"
+        strokeWidth={0.7}
+      />
       <div
         className="pointer-events-none absolute top-1/2 left-1/2 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-signal-red/10 blur-[150px]"
         aria-hidden

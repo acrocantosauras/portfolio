@@ -155,6 +155,9 @@ export function RecruiterDrawer() {
                     <p className="font-mono text-[10px] tracking-[0.2em] text-web-blue-bright uppercase">
                       {e.role}
                     </p>
+                    <p className="mt-0.5 font-mono text-[9px] tracking-[0.2em] text-paper-dim uppercase">
+                      {e.period}
+                    </p>
                     <p className="mt-1 text-xs text-paper-dim">{e.points[0]}</p>
                   </div>
                 ))}

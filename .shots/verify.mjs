@@ -1,7 +1,14 @@
 // Temporary verification harness (not part of the app). Run: node .shots/verify.mjs
-// Target URL is configurable via VITE_SITE_URL (defaults to the project's configured
-// local vinext dev port). Do not hardcode localhost:3000 — this project's dev server
-// binds 3001 and may fall back to 3002 when 3001 is occupied.
+// Target URL is configurable through the environment:
+//   VERIFY_URL  — any reachable base URL (takes precedence), e.g. VERIFY_URL=https://example.com
+//   VERIFY_PORT — port of the local dev server when VERIFY_URL is not set
+//   Neither set  — the harness probes this project's candidate dev ports and uses
+//                 whichever one is actually serving the portfolio:
+//                   3001  npm run dev:vinext  (`vite dev --port 3001`)
+//                   3002  vite's automatic fallback when 3001 is occupied
+//                   3000  npm run dev         (`next dev`)
+//   Legacy VITE_SITE_URL / VITE_PORT names are still honored.
+
 import puppeteer from "puppeteer-core";
 import { PNG } from "pngjs";
 import fs from "node:fs";
@@ -12,8 +19,42 @@ const CHROME = process.platform === "win32"
   ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
   : "/usr/bin/google-chrome";
 
-const URL = process.env.VITE_SITE_URL || "http://localhost:3001/";
-const OUT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".shots");
+// --- Configuration ---
+const SITE_URL = process.env.VERIFY_URL ?? process.env.VITE_SITE_URL;
+const PORT = process.env.VERIFY_PORT ?? process.env.VITE_PORT;
+const CANDIDATE_PORTS = ["3001", "3002", "3000"];
+// Signature string that only exists in this portfolio's rendered HTML.
+const SIGNATURE = "Meet Jadhav";
+const normalize = (u) => (u.endsWith("/") ? u : u + "/");
+
+async function resolveBaseUrl() {
+  if (SITE_URL) return normalize(SITE_URL);
+  if (PORT) return `http://localhost:${PORT}/`;
+  for (const port of CANDIDATE_PORTS) {
+    try {
+      const res = await fetch(`http://localhost:${port}/`, {
+        redirect: "follow",
+        signal: AbortSignal.timeout(4000),
+      });
+      const html = await res.text();
+      if (res.ok && html.includes(SIGNATURE)) {
+        console.log(`verify: auto-detected dev server on port ${port}`);
+        return `http://localhost:${port}/`;
+      }
+    } catch {
+      /* not listening / not ours — keep probing */
+    }
+  }
+  throw new Error(
+    `No portfolio dev server found on ports ${CANDIDATE_PORTS.join(", ")}. ` +
+      "Start one (npm run dev:vinext) or set VERIFY_URL / VERIFY_PORT."
+  );
+}
+const VERIFY_TARGET_URL = await resolveBaseUrl();
+console.log(`verify: targeting ${VERIFY_TARGET_URL}`);
+
+// Screenshots go next to this script in .shots/
+const OUT = path.dirname(fileURLToPath(import.meta.url));
 fs.mkdirSync(OUT, { recursive: true });
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -63,7 +104,7 @@ const browser = await puppeteer.launch({
 /* ---------------- DESKTOP ---------------- */
 {
   const { page, errors } = await makePage(browser, { width: 1440, height: 900 });
-  await page.goto(URL, { waitUntil: "domcontentloaded" });
+  await page.goto(VERIFY_TARGET_URL, { waitUntil: "domcontentloaded" });
 
   await page
     .waitForSelector('[aria-label="Opening title sequence"]', { timeout: 5000 })
@@ -175,10 +216,19 @@ const browser = await puppeteer.launch({
       ?.click();
   });
   await sleep(300);
-  const readout = await page.evaluate(
-    () => document.querySelector('#aegisforge [role="status"]')?.textContent ?? ""
+  const readouts = await page.evaluate(() =>
+    [...document.querySelectorAll("#aegisforge [role=\"status\"]")].map(
+      (el) => el.textContent ?? ""
+    )
   );
-  check("desktop: agent node click updates readout", /Research Agent/.test(readout), readout.slice(0, 60));
+  // AegisForge has two live regions: the stage inspector (first) and the
+  // agent-registry readout (last). An agent click updates the latter.
+  const agentReadout = readouts[readouts.length - 1] ?? "";
+  check(
+    "desktop: agent node click updates readout",
+    /Research Agent/.test(agentReadout),
+    agentReadout.slice(0, 60)
+  );
   await page.screenshot({ path: `${OUT}/04-aegisforge.png` });
 
   // project dossier
@@ -266,7 +316,7 @@ const browser = await puppeteer.launch({
     hasTouch: true,
     deviceScaleFactor: 2,
   });
-  await page.goto(URL, { waitUntil: "domcontentloaded" });
+  await page.goto(VERIFY_TARGET_URL, { waitUntil: "domcontentloaded" });
   await page
     .waitForSelector('[aria-label="Opening title sequence"]', { timeout: 5000 })
     .then(() => check("mobile: intro overlay appears", true))
@@ -315,7 +365,7 @@ const browser = await puppeteer.launch({
   await page.emulateMediaFeatures([
     { name: "prefers-reduced-motion", value: "reduce" },
   ]);
-  await page.goto(URL, { waitUntil: "domcontentloaded" });
+  await page.goto(VERIFY_TARGET_URL, { waitUntil: "domcontentloaded" });
   await sleep(900);
   check(
     "reduced-motion: intro bypassed",

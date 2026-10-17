@@ -51,7 +51,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0a0d",
+  themeColor: "#06070b",
   colorScheme: "dark",
   width: "device-width",
   initialScale: 1,
@@ -64,6 +64,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${display.variable} ${body.variable} ${mono.variable} h-full`}
     >
       <body className="h-full bg-ink text-paper antialiased selection:bg-signal-red selection:text-paper">
+        {/* If JavaScript is unavailable, reveal content that motion would normally
+            animate in — the site stays readable without its animation layer. */}
+        <noscript>
+          <style>{`
+            [style*="opacity: 0"] { opacity: 1 !important; }
+            [style*="translateY"] { transform: none !important; }
+            [style*="translateX"] { transform: none !important; }
+          `}</style>
+        </noscript>
         {children}
       </body>
     </html>

@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { RotateCcw } from "lucide-react";
 import { Mark } from "@/components/ui/Mark";
+import { Skyline } from "@/components/ui/Skyline";
+import { SpiderEmblem } from "@/components/intro/SpiderEmblem";
+import { useIntro } from "@/components/intro/IntroSequence";
 import { profile } from "@/data/resume";
 
 const EASTER_EGG_LINES = [
@@ -15,6 +19,7 @@ const EASTER_EGG_LINES = [
 export function FinalScene() {
   const [clicks, setClicks] = useState(0);
   const [eggLine, setEggLine] = useState<string | null>(null);
+  const { replay } = useIntro();
 
   function handleMarkClick() {
     const next = clicks + 1;
@@ -30,8 +35,17 @@ export function FinalScene() {
 
   return (
     <footer className="relative overflow-hidden bg-ink py-20">
+      {/* emblem echo + city at rest */}
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-paper/[0.04]" aria-hidden>
+        <SpiderEmblem className="h-[70vmin] w-[70vmin]" />
+      </div>
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-web-blue/10 to-transparent" aria-hidden />
+      <Skyline
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-24 w-full text-ink-soft opacity-70"
+        opacity={0.7}
+      />
       <div
-        className="absolute inset-0 opacity-[0.04]"
+        className="pointer-events-none absolute inset-0 opacity-[0.04]"
         style={{
           backgroundImage:
             "repeating-linear-gradient(0deg, var(--color-paper) 0, var(--color-paper) 1px, transparent 1px, transparent 40px), repeating-linear-gradient(90deg, var(--color-paper) 0, var(--color-paper) 1px, transparent 1px, transparent 40px)",
@@ -44,8 +58,11 @@ export function FinalScene() {
           End of Transmission
         </p>
         <h2 className="mt-3 font-display text-5xl tracking-wide text-paper sm:text-7xl">
-          SYSTEM <span className="text-signal-red-bright">STANDING BY</span>
+          SYSTEM <span className="masthead-sm">STANDING BY</span>
         </h2>
+        <p className="gold-subtitle mt-4 inline-block -skew-x-12 font-mono text-xs tracking-[0.35em] uppercase sm:text-sm">
+          Same city · Brand new day
+        </p>
 
         {/* footer nav */}
         <nav className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3" aria-label="Footer">
@@ -75,6 +92,15 @@ export function FinalScene() {
           >
             Resume
           </a>
+          <button
+            type="button"
+            onClick={replay}
+            data-sense="true"
+            className="flex items-center gap-2 font-mono text-xs tracking-[0.2em] text-paper-dim uppercase transition-colors hover:text-signal-red-bright"
+            aria-label="Replay the opening title sequence"
+          >
+            <RotateCcw size={13} /> Replay intro
+          </button>
         </nav>
 
         <button
@@ -106,6 +132,10 @@ export function FinalScene() {
         </p>
         <p className="mt-1 font-mono text-[10px] text-paper-dim/70">
           Designed &amp; built from scratch — Next.js, TypeScript, Motion.
+        </p>
+        <p className="mt-3 font-mono text-[9px] tracking-[0.15em] text-paper-dim/50 uppercase">
+          Spider-Man-inspired visual direction · original artwork · not affiliated
+          with Marvel or Sony
         </p>
       </div>
     </footer>

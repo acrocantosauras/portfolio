@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import {
   motion,
   useScroll,
@@ -38,8 +38,6 @@ export function Hero() {
   const sy = useSpring(my, { stiffness: 60, damping: 20 });
   const glowX = useTransform(sx, [-0.5, 0.5], [-30, 30]);
   const glowY = useTransform(sy, [-0.5, 0.5], [-20, 20]);
-  const titleX = useTransform(sx, [-0.5, 0.5], [12, -12]);
-  const titleY = useTransform(sy, [-0.5, 0.5], [8, -8]);
 
   useEffect(() => {
     if (reduceMotion) return;

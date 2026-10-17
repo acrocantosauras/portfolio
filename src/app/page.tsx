@@ -9,6 +9,7 @@ import { Journey } from "@/components/sections/Journey";
 import { CaseFile } from "@/components/sections/CaseFile";
 import { Contact } from "@/components/sections/Contact";
 import { FinalScene } from "@/components/sections/FinalScene";
+import { WebDivider } from "@/components/ui/WebDivider";
 
 export default function Home() {
   return (
@@ -16,10 +17,13 @@ export default function Home() {
       <main>
         <Hero />
         <AegisForge />
+        <WebDivider />
         <UchitVision />
+        <WebDivider tone="blue" />
         <Missions />
         <Workshop />
         <Identity />
+        <WebDivider />
         <Journey />
         <CaseFile />
         <Contact />

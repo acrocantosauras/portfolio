@@ -3,6 +3,7 @@
 import { motion } from "motion/react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Chip } from "@/components/ui/Chip";
+import { WebCorner } from "@/components/ui/WebCorner";
 import { skillGroups } from "@/data/resume";
 import { cn } from "@/lib/utils";
 
@@ -11,8 +12,13 @@ export function Workshop() {
   const others = skillGroups.filter((g) => !g.featured);
 
   return (
-    <section id="workshop" className="relative bg-ink py-24 sm:py-32">
-      <div className="mx-auto max-w-7xl px-5 sm:px-8">
+    <section id="workshop" className="relative overflow-hidden bg-ink py-24 sm:py-32">
+      <WebCorner
+        anchor="bl"
+        className="absolute -bottom-4 -left-4 h-[30vmin] w-[30vmin] text-web-blue-bright/[0.06]"
+        strokeWidth={0.7}
+      />
+      <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
         <SectionHeading eyebrow="Skills / Capability Matrix" title="THE ARSENAL" />
 
         {/* featured groups — larger, interactive */}

@@ -23,6 +23,9 @@
 # vinext / cloudflare build output
 /dist/
 
+# browser-verification screenshots (harness .shots/verify.mjs)
+.shots/*.png
+
 # misc
 .DS_Store
 *.pem

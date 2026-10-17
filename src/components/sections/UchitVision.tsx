@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Chip } from "@/components/ui/Chip";
@@ -62,14 +62,6 @@ export function UchitVision() {
   const [activePipe, setActivePipe] = useState(0);
   const clock = useClock(Boolean(reduceMotion));
   const stamp = clock.toTimeString().slice(0, 8);
-
-  useEffect(() => {
-    if (reduceMotion) return;
-    const t = setInterval(() => {
-      setActivePipe((p) => (p + 1) % PIPELINE.length);
-    }, 1600);
-    return () => clearInterval(t);
-  }, [reduceMotion]);
 
   useEffect(() => {
     if (reduceMotion) return;

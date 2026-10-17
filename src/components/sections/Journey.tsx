@@ -23,7 +23,7 @@ const ENTRIES: Entry[] = [
   {
     id: "uchit",
     icon: Building2,
-    period: "Industry Experience",
+    period: uchit.period,
     title: uchit.role,
     org: uchit.company,
     location: uchit.location,
