@@ -9,74 +9,19 @@ import {
   useSpring,
   useReducedMotion,
 } from "motion/react";
-import { ArrowDown, Download, FileText, Code2, Mail } from "lucide-react";
+import { ArrowDown, Download, FileText, Code2, Mail, RotateCcw } from "lucide-react";
 import { RainCanvas } from "@/components/layout/RainCanvas";
+import { Skyline } from "@/components/ui/Skyline";
+import { SpiderEmblem } from "@/components/intro/SpiderEmblem";
+import { useIntro } from "@/components/intro/IntroSequence";
 import { profile } from "@/data/resume";
 import { useRecruiterMode } from "@/components/layout/RecruiterModeContext";
 
-const BOOT_LINES = [
-  "MJSYS v2.6 — initializing",
-  "loading kernel: reasoning.core",
-  "mounting /knowledge /agents /tools",
-  "telemetry: ONLINE",
-  "identity verified",
-];
-
-/** Boot sequence overlay — ~1.4s total, skippable, reduced-motion aware. */
-function BootSequence({ onDone }: { onDone: () => void }) {
-  const [step, setStep] = useState(0);
-  const [exiting, setExiting] = useState(false);
-
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      onDone();
-      return;
-    }
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    BOOT_LINES.forEach((_, i) => {
-      timers.push(setTimeout(() => setStep(i + 1), 120 + i * 180));
-    });
-    timers.push(setTimeout(() => setExiting(true), 120 + BOOT_LINES.length * 180 + 250));
-    timers.push(setTimeout(onDone, 120 + BOOT_LINES.length * 180 + 550));
-    return () => timers.forEach(clearTimeout);
-  }, [onDone]);
-
-  return (
-    <motion.div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-ink"
-      initial={{ opacity: 1 }}
-      animate={{ opacity: exiting ? 0 : 1 }}
-      transition={{ duration: 0.35, ease: "easeOut" }}
-      aria-hidden
-    >
-      <div className="font-mono text-[11px] leading-6 tracking-[0.15em] text-web-blue-bright/80 sm:text-xs">
-        {BOOT_LINES.slice(0, step).map((line, i) => (
-          <motion.p key={line} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.1 }}>
-            <span className="text-signal-red-bright">{"> "}</span>
-            {line}
-            {i === step - 1 && <span className="ml-1 animate-pulse">▊</span>}
-          </motion.p>
-        ))}
-      </div>
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
-        <div className="h-px w-40 overflow-hidden bg-hairline">
-          <motion.div
-            className="h-full bg-signal-red-bright"
-            initial={{ width: "0%" }}
-            animate={{ width: exiting || step >= BOOT_LINES.length ? "100%" : `${(step / BOOT_LINES.length) * 100}%` }}
-            transition={{ duration: 0.2 }}
-          />
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-const TITLE_LINES = ["MEET", "JADHAV"];
+const TITLE = "MEET JADHAV";
 
 export function Hero() {
   const ref = useRef<HTMLDivElement>(null);
-  const [booted, setBooted] = useState(false);
+  const { done, replay } = useIntro();
   const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -114,8 +59,6 @@ export function Hero() {
       ref={ref}
       className="relative flex h-[100svh] min-h-[640px] w-full items-end overflow-hidden bg-ink"
     >
-      {!booted && <BootSequence onDone={() => setBooted(true)} />}
-
       {/* atmosphere */}
       <div className="absolute inset-0" aria-hidden>
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,#151622_0%,#08080a_60%)]" />
@@ -137,8 +80,17 @@ export function Hero() {
         />
       </div>
 
+      {/* faint emblem echo — the emblem never fully leaves the room */}
+      <motion.div
+        style={{ x: glowX, y: glowY }}
+        className="absolute top-[6%] right-[4%] hidden text-paper/[0.05] md:block"
+        aria-hidden
+      >
+        <SpiderEmblem className="h-[42vh] w-[42vh]" />
+      </motion.div>
+
       <motion.div style={{ y: skylineY }} className="absolute inset-x-0 bottom-0" aria-hidden>
-        <Skyline />
+        <Skyline className="h-[34vh] w-full text-ink-soft sm:h-[38vh]" />
       </motion.div>
 
       <RainCanvas />
@@ -150,9 +102,17 @@ export function Hero() {
       >
         <motion.div
           initial={false}
-          animate={booted ? "show" : "hidden"}
-          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.12, delayChildren: 0.05 } } }}
-          className="mb-6 flex items-center gap-3 font-mono text-[11px] tracking-[0.3em] text-paper-dim uppercase"
+          animate={done || reduceMotion ? "show" : "hidden"}
+          variants={{
+            hidden: {},
+            show: {
+              transition: {
+                staggerChildren: reduceMotion ? 0 : 0.12,
+                delayChildren: reduceMotion ? 0 : 0.05,
+              },
+            },
+          }}
+          className="ns-fix mb-6 flex flex-wrap items-center gap-3 font-mono text-[11px] tracking-[0.3em] text-paper-dim uppercase"
         >
           <motion.span
             variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }}
@@ -170,43 +130,70 @@ export function Hero() {
             </span>
             Systems Online
           </motion.span>
+          <motion.button
+            type="button"
+            variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }}
+            onClick={replay}
+            data-sense="true"
+            className="flex items-center gap-1.5 border border-hairline px-2 py-1 transition-colors hover:border-signal-red-bright/70 hover:text-signal-red-bright"
+            aria-label="Replay the opening title sequence"
+          >
+            <RotateCcw size={11} /> Replay intro
+          </motion.button>
         </motion.div>
 
-        <motion.h1
-          style={{ x: titleX, y: titleY }}
-          className="font-display text-[19vw] leading-[0.82] tracking-wide text-paper sm:text-[13vw] md:text-[10rem] lg:text-[12rem]"
+        <h1
+          className="ns-fix font-display text-[19vw] leading-[0.86] tracking-wide sm:text-[13vw] md:text-[10rem] lg:text-[12rem]"
           aria-label="Meet Jadhav"
         >
-          {TITLE_LINES.map((line, li) => (
-            <span key={line} className="block overflow-hidden" aria-hidden>
-              <motion.span
-                className={li === 1 ? "block text-signal-red-bright" : "block"}
-                initial={{ y: "110%" }}
-                animate={booted ? { y: "0%" } : { y: "110%" }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 + li * 0.14 }}
+          <span className="masthead block">
+            <span className="sr-only">{"MEET JADHAV"}</span>
+            {TITLE.split("").map((ch, i) => (
+              <span
+                key={i}
+                className="inline-block overflow-hidden pr-[0.05em] pb-[0.16em]"
+                aria-hidden
               >
-                {line}
-              </motion.span>
-            </span>
-          ))}
-        </motion.h1>
+                <motion.span
+                  className="block"
+                  initial={{ y: "115%" }}
+                  animate={done || reduceMotion ? { y: "0%" } : { y: "115%" }}
+                  transition={{
+                    duration: reduceMotion ? 0 : 0.8,
+                    ease: [0.16, 1, 0.3, 1],
+                    delay: reduceMotion ? 0 : 0.1 + i * 0.05,
+                  }}
+                >
+                  {ch === " " ? "\u00A0" : ch}
+                </motion.span>
+              </span>
+            ))}
+          </span>
+        </h1>
 
         <motion.div
           initial={false}
-          animate={booted ? "show" : "hidden"}
-          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }}
-          className="mt-6 flex flex-col gap-4 sm:mt-8 sm:flex-row sm:items-end sm:justify-between"
+          animate={done || reduceMotion ? "show" : "hidden"}
+          variants={{
+            hidden: {},
+            show: {
+              transition: {
+                staggerChildren: reduceMotion ? 0 : 0.1,
+              },
+            },
+          }}
+          className="ns-fix mt-6 flex flex-col gap-4 sm:mt-8 sm:flex-row sm:items-end sm:justify-between"
         >
           <div>
             <motion.p
               variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }}
-              className="font-mono text-sm tracking-[0.25em] text-web-blue-bright uppercase sm:text-base"
+              className="gold-subtitle inline-block -skew-x-12 font-mono text-sm tracking-[0.3em] uppercase sm:text-base"
             >
               {profile.role}
             </motion.p>
             <motion.p
               variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }}
-              className="mt-2 max-w-md text-sm text-paper-dim sm:text-base"
+              className="mt-3 max-w-md text-sm text-paper-dim sm:text-base"
             >
               {profile.tagline}
             </motion.p>
@@ -214,9 +201,9 @@ export function Hero() {
 
           <motion.div variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }} className="flex flex-wrap gap-3">
             <a
-              href="#work"
+              href="#aegisforge"
               data-sense="true"
-              className="border-2 border-paper bg-paper px-5 py-3 font-mono text-xs font-semibold tracking-[0.2em] text-ink uppercase transition-colors hover:bg-signal-red-bright hover:border-signal-red-bright hover:text-paper"
+              className="border-2 border-paper bg-paper px-5 py-3 font-mono text-xs font-semibold tracking-[0.2em] text-ink uppercase transition-colors hover:border-signal-red-bright hover:bg-signal-red-bright hover:text-paper"
             >
               View Work
             </a>
@@ -268,48 +255,5 @@ export function Hero() {
         <ArrowDown size={14} />
       </motion.div>
     </section>
-  );
-}
-
-function Skyline() {
-  return (
-    <svg
-      viewBox="0 0 1440 260"
-      preserveAspectRatio="none"
-      className="h-[34vh] w-full text-ink-soft sm:h-[38vh]"
-      aria-hidden
-    >
-      <rect x="0" y="120" width="60" height="140" fill="currentColor" />
-      <rect x="70" y="60" width="40" height="200" fill="currentColor" />
-      <rect x="120" y="150" width="80" height="110" fill="currentColor" />
-      <rect x="215" y="90" width="50" height="170" fill="currentColor" />
-      <rect x="280" y="20" width="46" height="240" fill="currentColor" />
-      <rect x="335" y="130" width="70" height="130" fill="currentColor" />
-      <rect x="420" y="70" width="55" height="190" fill="currentColor" />
-      <rect x="490" y="160" width="90" height="100" fill="currentColor" />
-      <rect x="595" y="40" width="42" height="220" fill="currentColor" />
-      <rect x="650" y="100" width="65" height="160" fill="currentColor" />
-      <rect x="730" y="0" width="50" height="260" fill="currentColor" />
-      <rect x="795" y="140" width="75" height="120" fill="currentColor" />
-      <rect x="880" y="70" width="48" height="190" fill="currentColor" />
-      <rect x="940" y="160" width="90" height="100" fill="currentColor" />
-      <rect x="1045" y="30" width="46" height="230" fill="currentColor" />
-      <rect x="1100" y="110" width="60" height="150" fill="currentColor" />
-      <rect x="1175" y="150" width="80" height="110" fill="currentColor" />
-      <rect x="1265" y="60" width="45" height="200" fill="currentColor" />
-      <rect x="1320" y="130" width="120" height="130" fill="currentColor" />
-      <g fill="var(--color-amber)" opacity="0.55">
-        <rect x="85" y="80" width="4" height="4" />
-        <rect x="230" y="120" width="4" height="4" />
-        <rect x="295" y="60" width="4" height="4" />
-        <rect x="440" y="110" width="4" height="4" />
-        <rect x="610" y="90" width="4" height="4" />
-        <rect x="745" y="40" width="4" height="4" />
-        <rect x="900" y="110" width="4" height="4" />
-        <rect x="1060" y="70" width="4" height="4" />
-        <rect x="1190" y="190" width="4" height="4" />
-        <rect x="1345" y="170" width="4" height="4" />
-      </g>
-    </svg>
   );
 }

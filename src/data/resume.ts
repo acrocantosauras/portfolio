@@ -11,7 +11,7 @@ export const profile = {
   linkedin: "https://linkedin.com/in/meet-jadhav-05a64b250",
   linkedinLabel: "linkedin.com/in/meet-jadhav-05a64b250",
   github: "https://github.com/acrocantosauras",
-  githubLabel: "github.com/aegisforge",
+  githubLabel: "github.com/acrocantosauras",
   githubLabelShort: "github.com/acrocantosauras",
   resumeUrl: "/resume/Meet_Jadhav_Resume.pdf",
   identity: [
@@ -174,17 +174,66 @@ export type AegisStage = {
   id: string;
   label: string;
   sub: string;
+  detail: string;
 };
 
 export const aegisStages: AegisStage[] = [
-  { id: "request", label: "REQUEST", sub: "inbound task" },
-  { id: "planner", label: "PLANNER", sub: "decompose + route" },
-  { id: "graph", label: "AGENT GRAPH", sub: "specialists execute" },
-  { id: "tools", label: "TOOLS / MCP", sub: "external systems" },
-  { id: "rag", label: "RAG / KNOWLEDGE", sub: "private context" },
-  { id: "eval", label: "EVALUATION", sub: "critic validates" },
-  { id: "synthesis", label: "SYNTHESIS", sub: "compose result" },
-  { id: "result", label: "RESULT", sub: "delivered" },
+  {
+    id: "request",
+    label: "REQUEST",
+    sub: "inbound task",
+    detail:
+      "An inbound task enters through the FastAPI gateway — authenticated, validated, and queued for the graph.",
+  },
+  {
+    id: "planner",
+    label: "PLANNER",
+    sub: "decompose + route",
+    detail:
+      "The planner decomposes the request into ordered work and routes each task to the right specialist agent.",
+  },
+  {
+    id: "graph",
+    label: "AGENT GRAPH",
+    sub: "specialists execute",
+    detail:
+      "LangGraph coordinates the specialist agents — research, knowledge, code, vision, analysis — with checkpointed state.",
+  },
+  {
+    id: "tools",
+    label: "TOOLS / MCP",
+    sub: "external systems",
+    detail:
+      "A Model Context Protocol layer gives every agent standardized tool access to external systems.",
+  },
+  {
+    id: "rag",
+    label: "RAG / KNOWLEDGE",
+    sub: "private context",
+    detail:
+      "Private knowledge is retrieved through pgvector embedding search and grounded into agent context before generation.",
+  },
+  {
+    id: "eval",
+    label: "EVALUATION",
+    sub: "critic validates",
+    detail:
+      "The critic agent scores results against explicit criteria — weak results get reworked, not released.",
+  },
+  {
+    id: "synthesis",
+    label: "SYNTHESIS",
+    sub: "compose result",
+    detail:
+      "The synthesis agent merges agent outputs into one coherent deliverable, with state preserved via checkpointing.",
+  },
+  {
+    id: "result",
+    label: "RESULT",
+    sub: "delivered",
+    detail:
+      "The final result returns through the API — every step of the run is traceable via OpenTelemetry.",
+  },
 ];
 
 export type Project = {
@@ -508,16 +557,13 @@ export const experience: Experience[] = [
   {
     id: "uchit",
     company: "Uchit Technology",
-    role: "Computer Vision / AI Video Analytics",
-    period: "Industry Experience",
+    role: "AI / Video Analytics Trainee",
+    period: "September – October 2026",
     location: "Pune, India",
     kind: "industry",
-    domain: "REAL-TIME VIDEO ANALYTICS",
+    domain: "AI VIDEO ANALYTICS",
     points: [
-      "Worked on CCTV / video analytics systems — real-time person detection, object tracking, and person/head counting pipelines.",
-      "Detection and tracking with YOLO and OpenCV across live RTSP video streams.",
-      "Built CV pipelines that turn raw video into real-time analytics: detect, track, count, report.",
-      "Hands-on with edge AI concepts — running inference where the cameras are, not just in the cloud.",
+      "One-month trainee experience supporting AI model-training and reinforcement-learning workflows for AI video analytics, with exposure to the Uchit AI Box and related hardware.",
     ],
   },
 ];
