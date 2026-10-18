@@ -63,8 +63,15 @@ export function Missions() {
 
 function MiniArchitecture({ project }: { project: Project }) {
   const nodes = project.architecture.nodes.slice(0, 6);
+  // Ghost pipeline strip. It lives in the card's bottom padding band
+  // (band height == the card's padding at each breakpoint: p-5 → h-5,
+  // p-6 → h-6), so it can never cross the description, the tech chips, or
+  // the explore footer — while keeping the faint mission-control texture.
   return (
-    <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-3 opacity-[0.13] transition-opacity duration-300 group-hover:opacity-30" aria-hidden>
+    <div
+      className="pointer-events-none absolute inset-x-0 bottom-0 flex h-5 items-center justify-center gap-2 overflow-hidden opacity-[0.13] transition-opacity duration-300 group-hover:opacity-30 sm:h-6 sm:gap-3"
+      aria-hidden
+    >
       {nodes.map((n, i) => (
         <div key={n.id} className="flex items-center gap-3">
           {i > 0 && <span className="h-px w-6 bg-paper sm:w-10" />}
