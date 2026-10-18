@@ -361,6 +361,14 @@ const browser = await puppeteer.launch({
 /* ---------------- REDUCED MOTION ---------------- */
 {
   const page = await browser.newPage();
+  // Reduced motion changes render-time branches (variants, initial props,
+  // structure) in several components, which is exactly the shape that breaks
+  // React hydration — so this block must watch for errors too.
+  const rmErrors = [];
+  page.on("pageerror", (e) => rmErrors.push("pageerror: " + e.message));
+  page.on("console", (m) => {
+    if (m.type() === "error") rmErrors.push("console.error: " + m.text());
+  });
   await page.setViewport({ width: 1440, height: 900 });
   await page.emulateMediaFeatures([
     { name: "prefers-reduced-motion", value: "reduce" },
@@ -384,6 +392,7 @@ const browser = await puppeteer.launch({
     st.t === "none" || st.t === "matrix(1, 0, 0, 1, 0, 0)",
     st.t
   );
+  check("reduced-motion: no console/page errors", rmErrors.length === 0, rmErrors.slice(0, 3).join(" | "));
   await page.screenshot({ path: `${OUT}/08-reduced-motion.png` });
   await page.close();
 }

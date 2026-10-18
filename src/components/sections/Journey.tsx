@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { useReducedMotionSafe } from "@/lib/reduced-motion";
 import { GraduationCap, Award, Building2, FolderGit2 } from "lucide-react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { certifications, experience } from "@/data/resume";
@@ -68,7 +69,7 @@ const ENTRIES: Entry[] = [
 ];
 
 export function Journey() {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = useReducedMotionSafe();
 
   return (
     <section id="journey" className="relative bg-ink-soft py-24 sm:py-32">

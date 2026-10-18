@@ -7,8 +7,8 @@ import {
   useTransform,
   useMotionValue,
   useSpring,
-  useReducedMotion,
 } from "motion/react";
+import { useReducedMotionSafe } from "@/lib/reduced-motion";
 import { ArrowDown, Download, FileText, Code2, Mail, RotateCcw } from "lucide-react";
 import { RainCanvas } from "@/components/layout/RainCanvas";
 import { Skyline } from "@/components/ui/Skyline";
@@ -22,7 +22,7 @@ const TITLE = "MEET JADHAV";
 export function Hero() {
   const ref = useRef<HTMLDivElement>(null);
   const { done, replay } = useIntro();
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = useReducedMotionSafe();
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],

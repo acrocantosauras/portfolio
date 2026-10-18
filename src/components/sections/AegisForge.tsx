@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { useReducedMotionSafe } from "@/lib/reduced-motion";
 import { ExternalLink } from "lucide-react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Chip } from "@/components/ui/Chip";
@@ -32,7 +33,7 @@ function wrapLabel(label: string): [string, string | null] {
 export function AegisForge() {
   const ref = useRef<HTMLDivElement>(null);
   const diagramRef = useRef<HTMLDivElement>(null);
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = useReducedMotionSafe();
   const [pinned, setPinned] = useState<number | null>(null);
   const [auto, setAuto] = useState(0);
   const [activeAgent, setActiveAgent] = useState<string | null>(null);

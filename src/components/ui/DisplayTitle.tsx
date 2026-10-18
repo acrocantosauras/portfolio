@@ -1,7 +1,8 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { useReducedMotionSafe } from "@/lib/reduced-motion";
 
 /**
  * DisplayTitle — the interior display-typography system.
@@ -14,6 +15,9 @@ import { cn } from "@/lib/utils";
  *
  * The comic shadow is applied to AT MOST one accent word per heading so the
  * treatment keeps its impact. Reduced motion renders the final state directly.
+ *
+ * The reduced-motion branch flips in only after hydration
+ * (see lib/reduced-motion.ts) so server and client trees always match.
  */
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -38,7 +42,7 @@ export function DisplayTitle({
   /** Base delay before the first word (seconds). */
   delay?: number;
 }) {
-  const reduce = useReducedMotion();
+  const reduce = useReducedMotionSafe();
   const words = text.split(" ");
   const accentNorm = accent ? normalize(accent) : null;
 

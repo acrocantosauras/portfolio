@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { useReducedMotionSafe } from "@/lib/reduced-motion";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { DisplayTitle } from "@/components/ui/DisplayTitle";
 import { Chip } from "@/components/ui/Chip";
@@ -58,7 +59,9 @@ function useClock(frozen: boolean) {
 }
 
 export function UchitVision() {
-  const reduceMotion = useReducedMotion();
+  // Hydration-safe flag: the sweep-line child and the box `initial`/`animate`
+  // props branch on this value, so it must not differ during hydration.
+  const reduceMotion = useReducedMotionSafe();
   const count = PEOPLE.length;
   const [activePipe, setActivePipe] = useState(0);
   const clock = useClock(Boolean(reduceMotion));

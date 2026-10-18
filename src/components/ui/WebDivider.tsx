@@ -1,7 +1,8 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { useReducedMotionSafe } from "@/lib/reduced-motion";
 
 /**
  * A web-thread divider: a main strand sagging across the section break, with
@@ -15,7 +16,7 @@ export function WebDivider({
   className?: string;
   tone?: "mixed" | "red" | "blue";
 }) {
-  const reduce = useReducedMotion();
+  const reduce = useReducedMotionSafe();
 
   // One-shot path-draw for a strand; renders the final state for reduced motion.
   const draw = (delay: number) =>
