@@ -41,9 +41,10 @@ const PIPELINE_DETAIL: Record<string, string> = {
 
 function useClock(frozen: boolean) {
   // Keep the SSR/client clock identical so the OSD timestamp does not trigger
-  // a hydration mismatch. We render a fixed server time and only start ticking
-  // after hydration on the client.
-  const [now, setNow] = useState(() => new Date(0));
+  // a hydration mismatch. `null` renders a fixed placeholder on both server and
+  // client (toTimeString() is timezone-dependent, so even a fixed Date would
+  // differ between a UTC server and a local browser); ticking starts after hydration.
+  const [now, setNow] = useState<Date | null>(null);
   const started = useRef(false);
 
   useEffect(() => {
@@ -65,7 +66,7 @@ export function UchitVision() {
   const count = PEOPLE.length;
   const [activePipe, setActivePipe] = useState(0);
   const clock = useClock(Boolean(reduceMotion));
-  const stamp = clock.toTimeString().slice(0, 8);
+  const stamp = clock ? clock.toTimeString().slice(0, 8) : "--:--:--";
 
   useEffect(() => {
     if (reduceMotion) return;
