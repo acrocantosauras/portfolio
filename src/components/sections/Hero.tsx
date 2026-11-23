@@ -147,26 +147,37 @@ export function Hero() {
         >
           <span className="masthead block">
             <span className="sr-only">{"MEET JADHAV"}</span>
-            {TITLE.split("").map((ch, i) => (
-              <span
-                key={i}
-                className="inline-block overflow-hidden pr-[0.05em] pb-[0.16em]"
-                aria-hidden
-              >
-                <motion.span
-                  className="block"
-                  initial={{ y: "115%" }}
-                  animate={done || reduceMotion ? { y: "0%" } : { y: "115%" }}
-                  transition={{
-                    duration: reduceMotion ? 0 : 0.8,
-                    ease: [0.16, 1, 0.3, 1],
-                    delay: reduceMotion ? 0 : 0.1 + i * 0.05,
-                  }}
-                >
-                  {ch === " " ? "\u00A0" : ch}
-                </motion.span>
-              </span>
-            ))}
+            {TITLE.split(" ").map((word, w, words) => {
+              // letters before this word (incl. the space) keep the stagger index continuous
+              const offset = words.slice(0, w).reduce((n, x) => n + x.length + 1, 0);
+              return (
+                // each word is an unbreakable unit so narrow screens wrap between words, never mid-word
+                <span key={w} className="inline-block whitespace-nowrap" aria-hidden>
+                  {word.split("").map((ch, j) => (
+                    <span
+                      key={j}
+                      className="inline-block overflow-hidden pr-[0.05em] pb-[0.16em]"
+                    >
+                      <motion.span
+                        className="block"
+                        initial={{ y: "115%" }}
+                        animate={done || reduceMotion ? { y: "0%" } : { y: "115%" }}
+                        transition={{
+                          duration: reduceMotion ? 0 : 0.8,
+                          ease: [0.16, 1, 0.3, 1],
+                          delay: reduceMotion ? 0 : 0.1 + (offset + j) * 0.05,
+                        }}
+                      >
+                        {ch}
+                      </motion.span>
+                    </span>
+                  ))}
+                  {w < words.length - 1 && (
+                    <span className="inline-block w-[0.25em]">{"\u00A0"}</span>
+                  )}
+                </span>
+              );
+            })}
           </span>
         </h1>
         {/* one-shot cinematic light sweep across the masthead once the intro resolves */}
