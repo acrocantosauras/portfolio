@@ -49,3 +49,6 @@ next-env.d.ts
 .vinext/
 .wrangler/
 .cloudflare/
+
+# Playwright MCP output
+/.playwright-mcp/
