@@ -37,7 +37,7 @@
     "eslint": "^9",
     "eslint-config-next": "^16.4.6",
     "pngjs": "^7.0.0",
-    "puppeteer-core": "^23.11.1",
+    "puppeteer-core": "^25.18.1",
     "react-server-dom-webpack": "^19.3.1",
     "tailwindcss": "^4",
     "typescript": "^5",
