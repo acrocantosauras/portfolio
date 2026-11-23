@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Bebas_Neue, Inter, JetBrains_Mono } from "next/font/google";
+import { Bebas_Neue, Big_Shoulders, Inter, JetBrains_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { profile } from "@/data/resume";
 
@@ -19,11 +19,28 @@ const mono = JetBrains_Mono({
   subsets: ["latin"],
 });
 
+// The video-analytics chapter's own display face: a tall, hard, signage-style
+// condensed (Big Shoulders). It is deliberately different from the name's face so
+// the chapter has its own identity: cinematic computer vision, not just a heading.
+const vision = Big_Shoulders({
+  variable: "--font-vision",
+  subsets: ["latin"],
+});
+
+// The human voice of the site: pull-quotes, identity and journey prose.
+const serif = Instrument_Serif({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+});
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://meetjadhav.dev"),
+  // Update to the custom domain if/when one is attached.
+  metadataBase: new URL(profile.portfolioUrl),
   title: `${profile.name} — ${profile.role}`,
   description:
-    "Meet Jadhav — AI / Backend Engineer building production-grade multi-agent systems: LangGraph orchestration, RAG, LLM evaluation, full observability, and real-time computer vision.",
+    "Meet Jadhav — AI / Backend Engineer in Pune. Builds reliable, tested LLM systems in Python: a checkpointed multi-agent orchestrator (AegisForge), an LLM evaluation platform with CI quality gates, and a full-stack RAG application.",
   keywords: [
     "Meet Jadhav",
     "AI Engineer",
@@ -32,7 +49,6 @@ export const metadata: Metadata = {
     "LangGraph",
     "RAG",
     "LLM Evaluation",
-    "Computer Vision",
     "FastAPI",
     "pgvector",
     "Portfolio",
@@ -61,7 +77,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${display.variable} ${body.variable} ${mono.variable} h-full`}
+      className={`${display.variable} ${body.variable} ${mono.variable} ${serif.variable} ${vision.variable} h-full`}
     >
       <body className="h-full bg-ink text-paper antialiased selection:bg-signal-red selection:text-paper">
         {/* If JavaScript is unavailable, reveal content that motion would normally

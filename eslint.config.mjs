@@ -16,6 +16,10 @@ const eslintConfig = defineConfig([
     "dist/**",
     ".vinext/**",
     ".cloudflare/**",
+    // installed third-party agent skills and tool output (not project source):
+    ".claude/**",
+    ".agents/**",
+    ".playwright-mcp/**",
   ]),
 ]);
 

@@ -48,7 +48,14 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      // Everything except the resume PDF. Chrome's PDF viewer renders inside
+      // an <object> via an extension frame, and any X-Frame-Options header on
+      // the PDF response (even SAMEORIGIN) stops it from displaying. On
+      // Cloudflare the PDF is a static asset and gets no app headers at all;
+      // this keeps `next dev` consistent with production.
+      { source: "/((?!resume/).*)", headers: securityHeaders },
+    ];
   },
 };
 

@@ -1,34 +1,11 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
-import {
-  X,
-  Download,
-  Code2,
-  Link2,
-  Mail,
-  Phone,
-  Zap,
-  ArrowRight,
-} from "lucide-react";
+import { X, Download, Code2, Link2, Mail, Phone, ArrowUpRight } from "lucide-react";
 import { useRecruiterMode } from "./RecruiterModeContext";
 import { profile, projects, experience, skillGroups } from "@/data/resume";
-import { Chip } from "@/components/ui/Chip";
-
-const TOP_SKILLS = [
-  "Python",
-  "FastAPI",
-  "LangGraph",
-  "RAG / pgvector",
-  "Multi-Agent Systems",
-  "PostgreSQL",
-  "Redis",
-  "Docker",
-  "YOLO / OpenCV",
-  "Prometheus / Grafana",
-];
 
 const JUMPS = [
   { href: "#aegisforge", label: "AegisForge" },
@@ -39,8 +16,17 @@ const JUMPS = [
   { href: "#contact", label: "Contact" },
 ];
 
+function Label({ children }: { children: React.ReactNode }) {
+  return <p className="mb-3 text-sm font-medium text-paper">{children}</p>;
+}
+
+/**
+ * Recruiter view — the whole profile in one scroll, mirroring the resume:
+ * who, where, what was built (with real repo links), skills, and how to reach me.
+ */
 export function RecruiterDrawer() {
   const { open, setOpen } = useRecruiterMode();
+  const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -52,12 +38,11 @@ export function RecruiterDrawer() {
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
+    if (open) closeRef.current?.focus();
     return () => {
       document.body.style.overflow = "";
     };
   }, [open]);
-
-  const [flagship, ...rest] = projects;
 
   return (
     <AnimatePresence>
@@ -76,67 +61,58 @@ export function RecruiterDrawer() {
             key="panel"
             role="dialog"
             aria-modal="true"
-            aria-label="Recruiter Mode summary"
+            aria-label="Recruiter view"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 32, stiffness: 260 }}
-            className="fixed top-0 right-0 z-[95] flex h-full w-full max-w-md flex-col overflow-y-auto border-l-2 border-paper bg-ink-panel"
+            transition={{ type: "spring", damping: 34, stiffness: 280 }}
+            className="fixed top-0 right-0 z-[95] flex h-full w-full max-w-md flex-col overflow-y-auto border-l border-hairline bg-ink-panel text-paper"
           >
-            <div className="flex items-center justify-between border-b border-hairline px-6 py-5">
-              <div className="flex items-center gap-2 font-mono text-xs tracking-[0.3em] text-signal-red-bright uppercase">
-                <Zap size={14} />
-                Recruiter Mode
-              </div>
+            <div className="flex items-center justify-between border-b border-hairline px-6 py-4">
+              <p className="font-serif text-2xl italic">Recruiter view</p>
               <button
+                ref={closeRef}
                 type="button"
                 onClick={() => setOpen(false)}
-                aria-label="Close recruiter mode"
-                className="text-paper-dim transition-colors hover:text-paper"
+                aria-label="Close recruiter view"
+                className="p-1 text-paper-dim transition-colors hover:text-paper"
               >
                 <X size={20} />
               </button>
             </div>
 
-            <div className="flex flex-1 flex-col gap-7 px-6 py-6">
+            <div className="flex flex-1 flex-col gap-8 px-6 py-6">
               {/* about */}
               <div className="flex items-center gap-4">
-                <div className="relative flex h-[72px] w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-hairline">
+                <div className="relative h-[72px] w-[72px] shrink-0 overflow-hidden border border-hairline">
                   <Image
                     src="/images/meet-jadhav.jpg"
                     alt="Meet Jadhav"
                     fill
-                    className="object-cover"
+                    className="object-cover object-top"
                     sizes="72px"
                   />
                 </div>
                 <div>
-                  <h3 className="font-display text-3xl tracking-wide text-paper">
-                    {profile.name}
-                  </h3>
-                  <p className="mt-1 font-mono text-xs tracking-[0.2em] text-web-blue-bright uppercase">
+                  <h3 className="font-display text-3xl tracking-wide">{profile.name}</h3>
+                  <p className="mt-1 text-sm text-paper-dim">
                     {profile.role} · {profile.location}
                   </p>
                 </div>
               </div>
-              <p className="text-sm leading-relaxed text-paper-dim">
-                {profile.summary}
-              </p>
+              <p className="-mt-3 text-[15px] leading-relaxed text-paper/90">{profile.summary}</p>
 
-              {/* 30-second jumps */}
               <div>
-                <p className="mb-3 font-mono text-[11px] tracking-[0.25em] text-paper-dim uppercase">
-                  Quick Navigation
-                </p>
+                <Label>Jump to</Label>
                 <div className="flex flex-wrap gap-2">
                   {JUMPS.map((j) => (
                     <a
                       key={j.href}
                       href={j.href}
                       onClick={() => setOpen(false)}
-                      className="flex items-center gap-1.5 border border-hairline px-3 py-1.5 font-mono text-[11px] tracking-[0.15em] text-paper uppercase transition-colors hover:border-signal-red-bright hover:text-signal-red-bright"
+                      className="border border-hairline px-3 py-1.5 text-sm text-paper transition-colors hover:border-signal-red-bright hover:text-signal-red-bright"
                     >
-                      {j.label} <ArrowRight size={11} />
+                      {j.label}
                     </a>
                   ))}
                 </div>
@@ -144,139 +120,113 @@ export function RecruiterDrawer() {
 
               {/* experience */}
               <div>
-                <p className="mb-3 font-mono text-[11px] tracking-[0.25em] text-paper-dim uppercase">
-                  Industry Experience
-                </p>
+                <Label>Experience</Label>
                 {experience.map((e) => (
-                  <div key={e.id} className="border border-hairline p-3">
-                    <p className="font-display text-lg tracking-wide text-paper">
-                      {e.company}
+                  <div key={e.id} className="border-t border-hairline py-3">
+                    <p className="text-base font-medium">
+                      {e.role}, {e.company}
                     </p>
-                    <p className="font-mono text-[10px] tracking-[0.2em] text-web-blue-bright uppercase">
-                      {e.role}
+                    <p className="text-sm text-paper-dim">
+                      {e.period} · {e.location}
                     </p>
-                    <p className="mt-0.5 font-mono text-[9px] tracking-[0.2em] text-paper-dim uppercase">
-                      {e.period}
-                    </p>
-                    <p className="mt-1 text-xs text-paper-dim">{e.points[0]}</p>
+                    <p className="mt-1.5 text-sm leading-relaxed text-paper/90">{e.points[0]}</p>
                   </div>
                 ))}
               </div>
 
-              {/* flagship */}
+              {/* projects */}
               <div>
-                <p className="mb-3 font-mono text-[11px] tracking-[0.25em] text-paper-dim uppercase">
-                  Flagship
-                </p>
-                <a
-                  href="#aegisforge"
-                  onClick={() => setOpen(false)}
-                  className="block border border-signal-red/50 bg-signal-red/5 p-3 transition-colors hover:border-signal-red-bright"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-display text-xl tracking-wide text-paper">
-                      {flagship.title}
-                    </span>
-                    <Chip tone="red">Flagship</Chip>
-                  </div>
-                  <p className="mt-1 text-xs leading-relaxed text-paper-dim">
-                    {flagship.oneLiner}
-                  </p>
-                </a>
-              </div>
-
-              {/* other projects */}
-              <div>
-                <p className="mb-3 font-mono text-[11px] tracking-[0.25em] text-paper-dim uppercase">
-                  Other Systems
-                </p>
-                <div className="flex flex-col gap-3">
-                  {rest.map((p) => (
-                    <a
-                      key={p.slug}
-                      href="#missions"
-                      onClick={() => setOpen(false)}
-                      className="group border border-hairline p-3 transition-colors hover:border-signal-red/60"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-display text-lg tracking-wide text-paper">
-                          {p.title}
-                        </span>
-                        <span className="font-mono text-[10px] text-paper-dim">{p.codename}</span>
+                <Label>Projects</Label>
+                <div className="border-b border-hairline">
+                  {projects.map((p) => {
+                    const repo = p.links?.[0]?.href;
+                    return (
+                      <div key={p.slug} className="border-t border-hairline py-3">
+                        <div className="flex items-baseline justify-between gap-3">
+                          <p className="text-base font-medium">{p.title}</p>
+                          <p className="shrink-0 text-xs text-paper-dim">{p.period}</p>
+                        </div>
+                        <p className="mt-1 text-sm leading-relaxed text-paper-dim">{p.oneLiner}</p>
+                        <p className="mt-2 flex items-center gap-4 text-sm">
+                          <a
+                            href="#missions"
+                            onClick={() => setOpen(false)}
+                            className="text-paper underline decoration-hairline transition-colors hover:text-signal-red-bright hover:decoration-signal-red-bright"
+                          >
+                            Details
+                          </a>
+                          {repo && (
+                            <a
+                              href={repo}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1 text-paper underline decoration-hairline transition-colors hover:text-signal-red-bright hover:decoration-signal-red-bright"
+                            >
+                              GitHub <ArrowUpRight size={13} />
+                            </a>
+                          )}
+                        </p>
                       </div>
-                      <p className="mt-1 text-xs leading-relaxed text-paper-dim">
-                        {p.oneLiner}
-                      </p>
-                    </a>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
               {/* skills */}
               <div>
-                <p className="mb-3 font-mono text-[11px] tracking-[0.25em] text-paper-dim uppercase">
-                  Core Stack
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {TOP_SKILLS.map((s) => (
-                    <Chip key={s}>{s}</Chip>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <p className="mb-3 font-mono text-[11px] tracking-[0.25em] text-paper-dim uppercase">
-                  Full Skill Set
-                </p>
-                <div className="flex flex-col gap-2">
+                <Label>Skills</Label>
+                <dl className="flex flex-col gap-2.5 text-sm">
                   {skillGroups.map((g) => (
-                    <div key={g.id} className="text-xs">
-                      <span className="text-paper-dim">{g.label}: </span>
-                      <span className="text-paper/90">{g.items.join(", ")}</span>
+                    <div key={g.id}>
+                      <dt className="inline text-paper-dim">{g.label}: </dt>
+                      <dd className="inline text-paper/90">{g.items.join(", ")}</dd>
                     </div>
                   ))}
-                </div>
+                </dl>
               </div>
 
               {/* contact */}
-              <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Contact</Label>
+                <p className="mb-4 text-sm text-paper-dim">{profile.seeking}</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <a
+                    href={profile.resumeUrl}
+                    download
+                    className="flex items-center justify-center gap-2 bg-paper px-3 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-signal-red-bright hover:text-paper"
+                  >
+                    <Download size={15} /> Resume
+                  </a>
+                  <a
+                    href={`mailto:${profile.email}`}
+                    className="flex items-center justify-center gap-2 border border-hairline px-3 py-2.5 text-sm text-paper transition-colors hover:border-signal-red-bright hover:text-signal-red-bright"
+                  >
+                    <Mail size={15} /> Email
+                  </a>
+                  <a
+                    href={profile.github}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center justify-center gap-2 border border-hairline px-3 py-2.5 text-sm text-paper transition-colors hover:border-signal-red-bright hover:text-signal-red-bright"
+                  >
+                    <Code2 size={15} /> GitHub
+                  </a>
+                  <a
+                    href={profile.linkedin}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center justify-center gap-2 border border-hairline px-3 py-2.5 text-sm text-paper transition-colors hover:border-signal-red-bright hover:text-signal-red-bright"
+                  >
+                    <Link2 size={15} /> LinkedIn
+                  </a>
+                </div>
                 <a
-                  href={profile.resumeUrl}
-                  download
-                  className="flex items-center justify-center gap-2 border border-paper bg-paper px-3 py-2.5 font-mono text-[11px] font-semibold tracking-[0.15em] text-ink uppercase transition-colors hover:bg-signal-red-bright hover:text-paper"
+                  href={`tel:${profile.phone}`}
+                  className="mt-4 flex items-center gap-2 text-sm text-paper-dim transition-colors hover:text-paper"
                 >
-                  <Download size={14} /> Resume
-                </a>
-                <a
-                  href={`mailto:${profile.email}`}
-                  className="flex items-center justify-center gap-2 border border-hairline px-3 py-2.5 font-mono text-[11px] tracking-[0.15em] text-paper uppercase transition-colors hover:border-signal-red-bright hover:text-signal-red-bright"
-                >
-                  <Mail size={14} /> Email
-                </a>
-                <a
-                  href={profile.github}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-center gap-2 border border-hairline px-3 py-2.5 font-mono text-[11px] tracking-[0.15em] text-paper uppercase transition-colors hover:border-web-blue-bright hover:text-web-blue-bright"
-                >
-                  <Code2 size={14} /> GitHub
-                </a>
-                <a
-                  href={profile.linkedin}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-center gap-2 border border-hairline px-3 py-2.5 font-mono text-[11px] tracking-[0.15em] text-paper uppercase transition-colors hover:border-web-blue-bright hover:text-web-blue-bright"
-                >
-                  <Link2 size={14} /> LinkedIn
+                  <Phone size={14} /> {profile.phone} · {profile.location}
                 </a>
               </div>
-
-              <a
-                href={`tel:${profile.phone}`}
-                className="-mt-3 flex items-center gap-2 font-mono text-xs text-paper-dim transition-colors hover:text-paper"
-              >
-                <Phone size={13} /> {profile.phone} · {profile.location}
-              </a>
             </div>
           </motion.div>
         </>

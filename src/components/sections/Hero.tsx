@@ -1,24 +1,39 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import {
   motion,
-  useScroll,
-  useTransform,
   useMotionValue,
+  useScroll,
   useSpring,
+  useTransform,
 } from "motion/react";
 import { useReducedMotionSafe } from "@/lib/reduced-motion";
-import { ArrowDown, Download, FileText, Code2, Mail, RotateCcw } from "lucide-react";
+import { ArrowDown, Download, RotateCcw } from "lucide-react";
 import { RainCanvas } from "@/components/layout/RainCanvas";
 import { Skyline } from "@/components/ui/Skyline";
-import { SpiderEmblem } from "@/components/intro/SpiderEmblem";
+import { WebField } from "@/components/ui/WebField";
+import { Magnetic } from "@/components/ui/Magnetic";
 import { useIntro } from "@/components/intro/IntroSequence";
 import { profile } from "@/data/resume";
 import { useRecruiterMode } from "@/components/layout/RecruiterModeContext";
 
-const TITLE = "MEET JADHAV";
+const LINES = ["MEET", "JADHAV"] as const;
+const EASE = [0.16, 1, 0.3, 1] as const;
 
+/**
+ * Hero — the title card, and the first thing you can play with.
+ *
+ * - The web in the corner is tugged toward your cursor and springs back; click
+ *   anywhere and a strand fires from the nearest top corner and sticks.
+ * - The name tilts in 3D toward the pointer, and each letter lifts when touched.
+ * - The skyline drifts against the pointer for depth, and scrolls away slower
+ *   than the page.
+ * - The two main buttons are magnetic.
+ *
+ * All of it is pointer-driven, so touch screens get the still composition, and
+ * reduced motion gets no tilt, no web physics and no magnets.
+ */
 export function Hero() {
   const ref = useRef<HTMLDivElement>(null);
   const { done, replay } = useIntro();
@@ -27,253 +42,209 @@ export function Hero() {
     target: ref,
     offset: ["start start", "end start"],
   });
-  const skylineY = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
-  const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "40%"]);
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-
-  // cursor-reactive parallax
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const sx = useSpring(mx, { stiffness: 60, damping: 20 });
-  const sy = useSpring(my, { stiffness: 60, damping: 20 });
-  const glowX = useTransform(sx, [-0.5, 0.5], [-30, 30]);
-  const glowY = useTransform(sy, [-0.5, 0.5], [-20, 20]);
-
-  useEffect(() => {
-    if (reduceMotion) return;
-    function onMove(e: PointerEvent) {
-      mx.set(e.clientX / window.innerWidth - 0.5);
-      my.set(e.clientY / window.innerHeight - 0.5);
-    }
-    window.addEventListener("pointermove", onMove, { passive: true });
-    return () => window.removeEventListener("pointermove", onMove);
-  }, [mx, my, reduceMotion]);
-
+  const skylineY = useTransform(scrollYProgress, [0, 1], ["0%", "14%"]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.75], [1, 0]);
   const { toggle } = useRecruiterMode();
+
+  // pointer position across the hero, -0.5 .. 0.5
+  const px = useMotionValue(0);
+  const py = useMotionValue(0);
+  const sx = useSpring(px, { stiffness: 90, damping: 20 });
+  const sy = useSpring(py, { stiffness: 90, damping: 20 });
+  const rotateY = useTransform(sx, [-0.5, 0.5], [-5, 5]);
+  const rotateX = useTransform(sy, [-0.5, 0.5], [3.5, -3.5]);
+  const skylineX = useTransform(sx, [-0.5, 0.5], [14, -14]);
+
+  const show = done || reduceMotion;
 
   return (
     <section
       id="top"
       ref={ref}
-      className="relative flex h-[100svh] min-h-[640px] w-full items-end overflow-hidden bg-ink"
+      onPointerMove={(e) => {
+        if (reduceMotion || e.pointerType === "touch") return;
+        const r = e.currentTarget.getBoundingClientRect();
+        px.set((e.clientX - r.left) / r.width - 0.5);
+        py.set((e.clientY - r.top) / r.height - 0.5);
+      }}
+      onPointerLeave={() => {
+        px.set(0);
+        py.set(0);
+      }}
+      className="relative flex h-[100svh] min-h-[680px] w-full items-end overflow-hidden bg-ink"
     >
-      {/* atmosphere */}
-      <div className="absolute inset-0" aria-hidden>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,#151622_0%,#08080a_60%)]" />
-        <motion.div
-          style={{ x: glowX, y: glowY }}
-          className="absolute top-0 left-[8%] h-[520px] w-[520px] -translate-y-1/3 animate-pulse-slow rounded-full bg-signal-red/20 blur-[120px]"
-        />
-        <motion.div
-          style={{ x: glowX, y: glowY }}
-          className="absolute top-0 right-[6%] h-[560px] w-[560px] -translate-y-1/4 animate-pulse-slow rounded-full bg-web-blue/25 blur-[130px] [animation-delay:1.5s]"
-        />
-        {/* technical grid */}
-        <div
-          className="absolute inset-0 opacity-[0.05]"
-          style={{
-            backgroundImage:
-              "repeating-linear-gradient(90deg, var(--color-paper) 0, var(--color-paper) 1px, transparent 1px, transparent 80px), repeating-linear-gradient(0deg, var(--color-paper) 0, var(--color-paper) 1px, transparent 1px, transparent 80px)",
-          }}
-        />
-      </div>
+      {/* the night, lit from the edges: blue from above-right, red from below-left */}
+      <div
+        className="absolute inset-0 bg-[radial-gradient(70%_55%_at_88%_-5%,rgba(29,95,209,0.34),transparent_70%),radial-gradient(60%_50%_at_-5%_105%,rgba(224,52,43,0.26),transparent_70%),linear-gradient(to_bottom,#0b1222_0%,#05070f_55%,#04060d_100%)]"
+        aria-hidden
+      />
 
-      {/* faint emblem echo — the emblem never fully leaves the room */}
+      <WebField targetRef={ref} />
+
+      {/* the city: flat rooftops, a few lit windows, drifting against the pointer */}
       <motion.div
-        style={{ x: glowX, y: glowY }}
-        className="absolute top-[6%] right-[4%] hidden text-paper/[0.05] md:block"
+        style={{ y: skylineY, x: skylineX }}
+        className="absolute inset-x-[-20px] bottom-3 sm:bottom-4"
         aria-hidden
       >
-        <SpiderEmblem className="h-[42vh] w-[42vh]" />
+        <Skyline className="h-[30vh] w-full text-[#0a1020] sm:h-[34vh]" />
       </motion.div>
 
-      <motion.div style={{ y: skylineY }} className="absolute inset-x-0 bottom-0" aria-hidden>
-        <Skyline className="h-[34vh] w-full text-ink-soft sm:h-[38vh]" />
-      </motion.div>
-
-      <RainCanvas />
-      <div className="halftone pointer-events-none absolute inset-0 opacity-[0.05]" aria-hidden />
+      <RainCanvas density={80} />
 
       <motion.div
-        style={{ y: contentY, opacity: contentOpacity }}
-        className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-20 sm:px-8 sm:pb-28"
+        style={{ opacity: contentOpacity }}
+        className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-16 sm:px-12 sm:pb-24"
       >
-        <motion.div
-          initial={false}
-          animate={done || reduceMotion ? "show" : "hidden"}
-          variants={{
-            hidden: {},
-            show: {
-              transition: {
-                staggerChildren: reduceMotion ? 0 : 0.12,
-                delayChildren: reduceMotion ? 0 : 0.05,
-              },
-            },
+        <motion.h1
+          style={{
+            rotateX,
+            rotateY,
+            transformPerspective: 1100,
+            transformOrigin: "left bottom",
           }}
-          className="ns-fix mb-6 flex flex-wrap items-center gap-3 font-mono text-[11px] tracking-[0.3em] text-paper-dim uppercase"
-        >
-          <motion.span
-            variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }}
-            className="border border-hairline px-2 py-1"
-          >
-            SYS.001
-          </motion.span>
-          <motion.span variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }}>
-            {profile.location}
-          </motion.span>
-          <motion.span variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-1.5">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            </span>
-            Systems Online
-          </motion.span>
-          <motion.button
-            type="button"
-            variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }}
-            onClick={replay}
-            data-sense="true"
-            className="flex items-center gap-1.5 border border-hairline px-2 py-1 transition-colors hover:border-signal-red-bright/70 hover:text-signal-red-bright"
-            aria-label="Replay the opening title sequence"
-          >
-            <RotateCcw size={11} /> Replay intro
-          </motion.button>
-        </motion.div>
-
-        <div className="relative">
-        <h1
-          className="ns-fix font-display text-[19vw] leading-[0.86] tracking-wide sm:text-[13vw] md:text-[10rem] lg:text-[12rem]"
+          className="font-display leading-[0.84]"
           aria-label="Meet Jadhav"
         >
-          <span className="masthead block">
-            <span className="sr-only">{"MEET JADHAV"}</span>
-            {TITLE.split(" ").map((word, w, words) => {
-              // letters before this word (incl. the space) keep the stagger index continuous
-              const offset = words.slice(0, w).reduce((n, x) => n + x.length + 1, 0);
-              return (
-                // each word is an unbreakable unit so narrow screens wrap between words, never mid-word
-                <span key={w} className="inline-block whitespace-nowrap" aria-hidden>
-                  {word.split("").map((ch, j) => (
-                    <span
-                      key={j}
-                      className="inline-block overflow-hidden pr-[0.05em] pb-[0.16em]"
-                    >
+          {LINES.map((line, w) => {
+            const offset = LINES.slice(0, w).reduce((n, x) => n + x.length, 0);
+            return (
+              <span
+                key={line}
+                // .masthead lives here, on the element that owns the font-size: its
+                // depth block and outline are in em, so they scale with this size
+                className="masthead block whitespace-nowrap [font-size:min(27vw,26vh,14rem)]"
+                aria-hidden
+              >
+                {line.split("").map((ch, j) => (
+                  // the wrapper lifts on hover; the clip lives on this same element's
+                  // child, so the letter itself is never cut off while it moves
+                  <motion.span
+                    key={j}
+                    className="inline-block"
+                    whileHover={
+                      reduceMotion
+                        ? undefined
+                        : { y: "-7%", rotate: -2.5, transition: { type: "spring", stiffness: 420, damping: 14 } }
+                    }
+                  >
+                    <span className="inline-block overflow-hidden pt-[0.04em] pr-[0.1em] pb-[0.12em] -mr-[0.06em]">
                       <motion.span
                         className="block"
-                        initial={{ y: "115%" }}
-                        animate={done || reduceMotion ? { y: "0%" } : { y: "115%" }}
+                        initial={{ y: "112%" }}
+                        animate={show ? { y: "0%" } : { y: "112%" }}
                         transition={{
-                          duration: reduceMotion ? 0 : 0.8,
-                          ease: [0.16, 1, 0.3, 1],
-                          delay: reduceMotion ? 0 : 0.1 + (offset + j) * 0.05,
+                          duration: reduceMotion ? 0 : 0.9,
+                          ease: EASE,
+                          delay: reduceMotion ? 0 : 0.05 + (offset + j) * 0.055,
                         }}
                       >
                         {ch}
                       </motion.span>
                     </span>
-                  ))}
-                  {w < words.length - 1 && (
-                    <span className="inline-block w-[0.25em]">{"\u00A0"}</span>
-                  )}
-                </span>
-              );
-            })}
-          </span>
-        </h1>
-        {/* one-shot cinematic light sweep across the masthead once the intro resolves */}
-        {done && !reduceMotion && (
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-0 overflow-hidden"
-          >
-            <span className="masthead-sweep" />
-          </span>
-        )}
-        </div>
+                  </motion.span>
+                ))}
+              </span>
+            );
+          })}
+        </motion.h1>
 
         <motion.div
           initial={false}
-          animate={done || reduceMotion ? "show" : "hidden"}
+          animate={show ? "show" : "hidden"}
           variants={{
             hidden: {},
             show: {
               transition: {
                 staggerChildren: reduceMotion ? 0 : 0.1,
+                delayChildren: reduceMotion ? 0 : 0.9,
               },
             },
           }}
-          className="ns-fix mt-6 flex flex-col gap-4 sm:mt-8 sm:flex-row sm:items-end sm:justify-between"
+          className="mt-6 flex flex-col gap-8 md:flex-row md:items-end md:justify-between"
         >
-          <div>
+          <div className="max-w-xl">
             <motion.p
               variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }}
-              className="gold-subtitle inline-block -skew-x-12 font-mono text-sm tracking-[0.3em] uppercase sm:text-base"
+              className="gold-subtitle text-[clamp(1.25rem,3.4vw,1.9rem)] leading-none"
             >
               {profile.role}
             </motion.p>
             <motion.p
               variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }}
-              className="mt-3 max-w-md text-sm text-paper-dim sm:text-base"
+              className="mt-4 max-w-md font-serif text-[1.65rem] leading-snug text-paper italic sm:text-3xl"
             >
               {profile.tagline}
             </motion.p>
+            <motion.p
+              variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }}
+              className="mt-4 flex items-center gap-2.5 text-sm text-paper-dim"
+            >
+              <span className="h-2 w-2 shrink-0 rounded-full bg-amber" aria-hidden />
+              {profile.location} · {profile.seeking}
+            </motion.p>
           </div>
 
-          <motion.div variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }} className="flex flex-wrap gap-3">
-            <a
-              href="#aegisforge"
-              data-sense="true"
-              className="border-2 border-paper bg-paper px-5 py-3 font-mono text-xs font-semibold tracking-[0.2em] text-ink uppercase transition-colors hover:border-signal-red-bright hover:bg-signal-red-bright hover:text-paper"
-            >
-              View Work
-            </a>
-            <a
-              href={profile.github}
-              target="_blank"
-              rel="noreferrer"
-              data-sense="true"
-              aria-label="GitHub profile"
-              className="flex items-center gap-2 border-2 border-hairline px-4 py-3 font-mono text-xs tracking-[0.2em] text-paper uppercase transition-colors hover:border-web-blue-bright hover:text-web-blue-bright"
-            >
-              <Code2 size={14} /> GitHub
-            </a>
-            <a
-              href={profile.resumeUrl}
-              download
-              data-sense="true"
-              className="flex items-center gap-2 border-2 border-hairline px-4 py-3 font-mono text-xs tracking-[0.2em] text-paper uppercase transition-colors hover:border-signal-red-bright hover:text-signal-red-bright"
-            >
-              <Download size={14} /> Resume
-            </a>
-            <a
-              href={`mailto:${profile.email}`}
-              data-sense="true"
-              aria-label="Email Meet Jadhav"
-              className="flex items-center gap-2 border-2 border-hairline px-4 py-3 font-mono text-xs tracking-[0.2em] text-paper uppercase transition-colors hover:border-signal-red-bright hover:text-signal-red-bright"
-            >
-              <Mail size={14} /> Contact
-            </a>
-            <button
-              type="button"
-              onClick={toggle}
-              data-sense="true"
-              className="flex items-center gap-2 border-2 border-signal-red/70 bg-signal-red/10 px-4 py-3 font-mono text-xs tracking-[0.2em] text-signal-red-bright uppercase transition-colors hover:bg-signal-red/25"
-            >
-              <FileText size={14} /> Recruiter
-            </button>
+          <motion.div
+            variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }}
+            className="flex flex-col items-start gap-4 md:items-end"
+          >
+            <div className="flex flex-wrap gap-3">
+              <Magnetic>
+                <a
+                  href="#aegisforge"
+                  className="suit-weave inline-flex items-center gap-2 border-2 border-ink px-6 py-3 text-sm font-semibold text-paper [text-shadow:0_1px_0_rgba(0,0,0,0.6)] transition-[filter] hover:brightness-110"
+                >
+                  View work <ArrowDown size={15} />
+                </a>
+              </Magnetic>
+              <Magnetic>
+                <a
+                  href={profile.resumeUrl}
+                  download
+                  className="inline-flex items-center gap-2 border-2 border-paper/70 px-6 py-3 text-sm text-paper transition-colors hover:border-gold hover:text-gold"
+                >
+                  <Download size={15} /> Resume
+                </a>
+              </Magnetic>
+            </div>
+            <p className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-paper-dim">
+              <a
+                href={profile.github}
+                target="_blank"
+                rel="noreferrer"
+                className="underline decoration-hairline transition-colors hover:text-signal-red-bright hover:decoration-signal-red-bright"
+              >
+                GitHub
+              </a>
+              <a
+                href={`mailto:${profile.email}`}
+                className="underline decoration-hairline transition-colors hover:text-signal-red-bright hover:decoration-signal-red-bright"
+              >
+                Email
+              </a>
+              <button
+                type="button"
+                onClick={toggle}
+                className="underline decoration-hairline transition-colors hover:text-signal-red-bright hover:decoration-signal-red-bright"
+              >
+                Recruiter view
+              </button>
+              <button
+                type="button"
+                onClick={replay}
+                aria-label="Replay the opening title sequence"
+                className="inline-flex items-center gap-1.5 transition-colors hover:text-paper"
+              >
+                <RotateCcw size={12} /> Replay intro
+              </button>
+            </p>
           </motion.div>
         </motion.div>
       </motion.div>
 
-      <motion.div
-        animate={{ y: [0, 8, 0] }}
-        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-1 text-paper-dim"
-        aria-hidden
-      >
-        <span className="font-mono text-[10px] tracking-[0.3em] uppercase">Scroll</span>
-        <ArrowDown size={14} />
-      </motion.div>
+      {/* a seam of the suit: red cloth, raised black web lines */}
+      <div className="suit-weave absolute inset-x-0 bottom-0 h-3 sm:h-4" aria-hidden />
     </section>
   );
 }

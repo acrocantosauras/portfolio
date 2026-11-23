@@ -2,100 +2,156 @@
 
 import { motion } from "motion/react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { Chip } from "@/components/ui/Chip";
-import { WebCorner } from "@/components/ui/WebCorner";
+import { ChapterMark } from "@/components/ui/ChapterMark";
 import { skillGroups } from "@/data/resume";
 import { cn } from "@/lib/utils";
 
+const EASE = [0.16, 1, 0.3, 1] as const;
+const group = (id: string) => skillGroups.find((g) => g.id === id)!;
+
+/** A ruler along a panel edge: the technical-drawing detail that ties these together. */
+function Ruler({ className }: { className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "pointer-events-none absolute block h-2 bg-[repeating-linear-gradient(90deg,currentColor_0_1px,transparent_1px_12px)] opacity-40",
+        className
+      )}
+    />
+  );
+}
+
+function Panel({
+  children,
+  className,
+  delay = 0,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  delay?: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 26 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.7, delay, ease: EASE }}
+      className={cn("relative overflow-hidden", className)}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+/**
+ * Skills, as editorial technical panels. Five different pieces of a spec sheet:
+ * two large overlapping panels for the work the projects lean on hardest, a long
+ * strip for testing and operations, and two small notes. Mirrors the resume's
+ * technical-skills block; the numbering is just the order they appear in.
+ */
 export function Workshop() {
-  const featured = skillGroups.filter((g) => g.featured);
-  const others = skillGroups.filter((g) => !g.featured);
+  const ai = group("ai-llm");
+  const be = group("backend-data");
+  const ops = group("testing-ops");
+  const lang = group("languages");
+  const fe = group("frontend");
 
   return (
-    <section id="workshop" className="relative overflow-hidden bg-ink py-24 sm:py-32">
-      <WebCorner
-        anchor="bl"
-        className="absolute -bottom-4 -left-4 h-[30vmin] w-[30vmin] text-web-blue-bright/[0.06]"
-        strokeWidth={0.7}
-      />
-      <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
-        <SectionHeading eyebrow="Skills / Capability Matrix" title="THE ARSENAL" />
+    <section id="workshop" className="surface-night-soft relative overflow-hidden py-28 sm:py-40">
+      <ChapterMark n="04" className="-top-[0.1em] -right-[0.08em] text-web-blue-bright/[0.12]" />
+      <div className="relative mx-auto max-w-7xl px-6 sm:px-12">
+        <SectionHeading title="SKILLS" />
 
-        {/* featured groups — larger, interactive */}
-        <div className="mt-14 grid grid-cols-1 gap-5 lg:grid-cols-2">
-          {featured.map((group, i) => (
-            <motion.div
-              key={group.id}
-              data-sense="true"
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.5, delay: (i % 2) * 0.08 }}
-              className="group relative border border-hairline bg-ink-panel/60 p-5 transition-colors hover:border-signal-red/50 sm:p-6"
+        <div className="mt-14 grid grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">
+          {/* AI / LLM: the large blue-grid panel */}
+          <Panel
+            className="panel-a bg-ink-panel px-7 pt-10 pb-16 text-paper sm:px-10 lg:col-span-7"
+          >
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 opacity-[0.16] [background-image:linear-gradient(var(--color-web-blue-bright)_1px,transparent_1px),linear-gradient(90deg,var(--color-web-blue-bright)_1px,transparent_1px)] [background-size:36px_36px]"
+            />
+            <span
+              aria-hidden
+              className="stroke-text pointer-events-none absolute -right-6 -bottom-12 font-display text-[18rem] leading-none text-web-blue-bright/20"
             >
-              <div className="mb-4 flex items-start justify-between gap-3">
-                <div>
-                  <p className="font-mono text-[10px] tracking-[0.3em] text-web-blue-bright uppercase">
-                    MOD.{String(i + 1).padStart(2, "0")}
-                  </p>
-                  <h3 className="mt-1 font-display text-2xl tracking-wide text-paper sm:text-3xl">
-                    {group.label}
-                  </h3>
-                </div>
-                <span className="mt-1 shrink-0 font-mono text-[10px] text-paper-dim">
-                  {String(group.items.length).padStart(2, "0")} modules
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {group.items.map((item, j) => (
-                  <motion.span
-                    key={item}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true, margin: "-40px" }}
-                    transition={{ duration: 0.3, delay: j * 0.03 }}
-                    className="inline-block"
-                  >
-                    <Chip tone={j === 0 ? "blue" : "default"}>{item}</Chip>
-                  </motion.span>
+              AI
+            </span>
+            <Ruler className="top-0 left-0 w-full text-web-blue-bright" />
+            <div className="relative">
+              <h3 className="font-serif text-4xl text-paper italic sm:text-5xl">{ai.label}</h3>
+              <ol className="mt-7 grid max-w-xl gap-x-8 gap-y-2.5 sm:grid-cols-2">
+                {ai.items.map((it, i) => (
+                  <li key={it} className="flex items-baseline gap-3 text-lg text-paper">
+                    <span className="font-mono text-[10px] text-web-blue-bright">{String(i + 1).padStart(2, "0")}</span>
+                    {it}
+                  </li>
                 ))}
-              </div>
-              <span
-                className="absolute top-0 left-0 h-full w-[3px] scale-y-0 bg-signal-red-bright transition-transform duration-300 group-hover:scale-y-100"
-                aria-hidden
-              />
-            </motion.div>
-          ))}
-        </div>
+              </ol>
+            </div>
+          </Panel>
 
-        {/* other groups — compact strips */}
-        <div className="mt-8 flex flex-col gap-3">
-          {others.map((group, i) => (
-            <motion.div
-              key={group.id}
-              initial={{ opacity: 0, x: -16 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.4, delay: i * 0.05 }}
-              className={cn(
-                "flex flex-col gap-2 border border-l-2 border-hairline bg-ink-panel/40 px-5 py-3.5 transition-colors sm:flex-row sm:items-center sm:gap-6",
-                i % 2 === 0
-                  ? "border-l-signal-red/60"
-                  : "border-l-web-blue-bright/50"
-              )}
-            >
-              <span className="w-40 shrink-0 font-mono text-[11px] tracking-[0.25em] text-paper-dim uppercase">
-                {group.label}
-              </span>
-              <div className="flex flex-wrap gap-1.5">
-                {group.items.map((item) => (
-                  <Chip key={item} className="text-[10px]">
-                    {item}
-                  </Chip>
+          {/* Backend: overlaps upward, red halftone */}
+          <Panel
+            delay={0.08}
+            className="panel-c bg-[#1a1020] px-7 pt-10 pb-14 text-paper sm:px-10 lg:col-span-6 lg:col-start-7 lg:-mt-12 lg:translate-y-0"
+          >
+            <span
+              aria-hidden
+              className="halftone halftone-fade-b pointer-events-none absolute inset-x-0 top-0 h-44 text-signal-red-bright/40"
+            />
+            <div className="relative">
+              <h3 className="font-serif text-4xl text-paper italic sm:text-5xl">{be.label}</h3>
+              <ul className="mt-7 flex flex-wrap gap-x-7 gap-y-2.5 text-lg text-paper">
+                {be.items.map((it) => (
+                  <li key={it} className="relative">
+                    {it}
+                    <span aria-hidden className="absolute -right-4 text-signal-red-bright/60">
+                      /
+                    </span>
+                  </li>
                 ))}
-              </div>
-            </motion.div>
-          ))}
+              </ul>
+            </div>
+          </Panel>
+
+          {/* Testing & Ops: the long strip with slanted ends */}
+          <Panel
+            delay={0.05}
+            className="bg-paper px-7 py-10 text-dawn-ink [clip-path:polygon(2.5%_0,100%_0,97.5%_100%,0_100%)] sm:px-14 lg:col-span-12"
+          >
+            <Ruler className="bottom-0 left-0 w-full text-dawn-ink" />
+            <div className="grid gap-x-12 gap-y-4 lg:grid-cols-[14rem_1fr] lg:items-baseline">
+              <h3 className="font-serif text-4xl text-dawn-ink italic sm:text-5xl">{ops.label}</h3>
+              <ul className="flex flex-wrap gap-x-8 gap-y-2 text-xl">
+                {ops.items.map((it) => (
+                  <li key={it} className="flex items-baseline gap-2">
+                    <span aria-hidden className="inline-block h-1.5 w-1.5 -translate-y-[0.15em] bg-signal-red-deep" />
+                    {it}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Panel>
+
+          {/* Languages and Frontend: two small notes at different offsets */}
+          <Panel delay={0.05} className="border border-hairline bg-ink px-7 py-8 text-paper lg:col-span-4 lg:col-start-2 lg:-rotate-1">
+            <h3 className="font-serif text-3xl text-paper italic">{lang.label}</h3>
+            <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-lg text-paper-dim">
+              {lang.items.map((it) => (
+                <li key={it}>{it}</li>
+              ))}
+            </ul>
+          </Panel>
+          <Panel delay={0.1} className="border border-hairline bg-ink px-7 py-8 text-paper lg:col-span-3 lg:col-start-7 lg:mt-6 lg:rotate-1">
+            <h3 className="font-serif text-3xl text-paper italic">{fe.label}</h3>
+            <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-lg text-paper-dim">
+              {fe.items.map((it) => (
+                <li key={it}>{it}</li>
+              ))}
+            </ul>
+          </Panel>
         </div>
       </div>
     </section>

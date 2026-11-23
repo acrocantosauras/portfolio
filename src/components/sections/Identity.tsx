@@ -1,131 +1,109 @@
 "use client";
 
 import { motion } from "motion/react";
-import { SectionHeading } from "@/components/ui/SectionHeading";
-import { ComicPanel } from "@/components/ui/ComicPanel";
-import { WebDivider } from "@/components/ui/WebDivider";
+import { ChapterMark } from "@/components/ui/ChapterMark";
 import { profile } from "@/data/resume";
 
-const STATS = [
-  { label: "Base of Operations", value: profile.location },
-  { label: "Focus", value: "Multi-Agent AI / Backend" },
-  { label: "Certification", value: "Azure AI-900" },
-  { label: "Grad Year", value: "2025 (B.E., E&TC)" },
-];
+const EASE = [0.16, 1, 0.3, 1] as const;
 
+const FACTS = [
+  { label: "Based in", value: profile.location },
+  { label: "Degree", value: "B.E., Electronics & Telecommunication, 2025" },
+  { label: "Certified", value: "Microsoft Azure AI Fundamentals (AI-900)" },
+] as const;
+
+/**
+ * About: portrait and type overlapping. The headline is set huge and cropped
+ * behind the photo, the photo (a real colour photo) is taped to the page at a
+ * slight angle with a red print offset, and the text panel overlaps the photo's
+ * edge. Nothing here is centred or boxed into a grid cell.
+ */
 export function Identity() {
+  const [lead, ...rest] = profile.identity;
+
   return (
-    <section id="identity" className="relative bg-ink py-24 sm:py-32">
-      <div className="mx-auto max-w-7xl px-5 sm:px-8">
-        <SectionHeading eyebrow="About / The Engineer" title="ORIGIN FILE" />
+    <section id="identity" className="surface-predawn relative overflow-hidden py-28 sm:py-40">
+      <ChapterMark n="05" className="-top-[0.08em] -left-[0.06em] text-paper/[0.07]" />
+      <span
+        aria-hidden
+        className="halftone halftone-fade-l pointer-events-none absolute top-24 right-0 h-72 w-96 text-signal-red-bright/30"
+      />
 
-        <div className="mt-14 grid grid-cols-1 gap-8 lg:grid-cols-[0.85fr_1.15fr]">
-          <motion.div
-            initial={{ opacity: 0, x: -24 }}
-            whileInView={{ opacity: 1, x: 0 }}
+      <div className="relative mx-auto max-w-7xl px-6 sm:px-12">
+        {/* the headline, behind and above the photo */}
+        <h2 className="font-display leading-[0.8] tracking-wide uppercase" aria-label="Under the mask">
+          <span aria-hidden className="stroke-text block text-paper/80 [font-size:clamp(4.5rem,15vw,13rem)]">
+            UNDER
+          </span>
+          <span aria-hidden className="block text-paper [font-size:clamp(4.5rem,15vw,13rem)] -mt-[0.03em]">
+            THE <span className="accent-comic">MASK</span>
+          </span>
+        </h2>
+
+        <div className="relative mt-[-1.5rem] grid grid-cols-1 gap-y-10 sm:mt-[-2.5rem] lg:mt-[-3.5rem] lg:grid-cols-12">
+          {/* the photo: colour, taped, angled, red print offset */}
+          <motion.figure
+            initial={{ opacity: 0, y: 30, rotate: -4 }}
+            whileInView={{ opacity: 1, y: 0, rotate: -2 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.9, ease: EASE }}
+            className="relative z-10 max-w-sm sm:max-w-md lg:col-span-5 lg:max-w-none"
           >
-            <ComicPanel className="relative aspect-[4/5] overflow-hidden">
-              <Silhouette />
-              <div className="absolute inset-x-0 bottom-0 border-t-2 border-paper bg-ink/85 p-4">
-                <p className="font-mono text-[10px] tracking-[0.25em] text-paper-dim uppercase">
-                  Subject
-                </p>
-                <p className="font-display text-2xl tracking-wide text-paper">
-                  {profile.name}
-                </p>
-              </div>
-            </ComicPanel>
+            <div className="relative aspect-[4/5] overflow-hidden border-2 border-paper bg-black shadow-[12px_12px_0_0_var(--color-signal-red)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/meet-jadhav.jpg"
+                alt={`Portrait of ${profile.name}`}
+                width={600}
+                height={692}
+                loading="lazy"
+                decoding="async"
+                className="h-full w-full object-cover object-top [filter:contrast(1.04)_saturate(1.06)]"
+              />
+              <div
+                className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent via-45% to-transparent"
+                aria-hidden
+              />
+              <figcaption className="absolute inset-x-0 bottom-0 p-5">
+                <span className="font-display text-3xl tracking-wide text-paper">{profile.name}</span>
+                <span className="mt-1 block text-sm text-paper-dim">{profile.location}</span>
+              </figcaption>
+            </div>
+            {/* strips of tape holding it to the page */}
+            <span aria-hidden className="absolute -top-3 -left-5 h-6 w-20 -rotate-[28deg] bg-gold/85" />
+            <span aria-hidden className="absolute -top-3 -right-5 h-6 w-20 rotate-[24deg] bg-gold/85" />
+          </motion.figure>
 
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              {STATS.map((s) => (
-                <div key={s.label} className="border border-hairline p-3">
-                  <p className="font-mono text-[9px] tracking-[0.2em] text-paper-dim uppercase">
-                    {s.label}
-                  </p>
-                  <p className="mt-1 text-sm text-paper">{s.value}</p>
-                </div>
+          {/* the text panel overlaps the photo's right edge */}
+          <motion.div
+            initial={{ opacity: 0, x: 28 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
+            className="relative z-20 border border-hairline bg-ink/90 px-7 py-9 backdrop-blur-[2px] sm:px-10 lg:col-span-8 lg:col-start-5 lg:mt-24 lg:-ml-10"
+          >
+            <p className="font-serif text-3xl leading-snug text-paper sm:text-[2.6rem]">{lead}</p>
+
+            <div className="mt-8 flex max-w-xl flex-col gap-5 text-lg leading-relaxed text-paper/90">
+              {rest.map((text, i) => (
+                <p key={i}>{text}</p>
               ))}
             </div>
+
+            <dl className="mt-10 max-w-xl border-t border-hairline">
+              {FACTS.map((f) => (
+                <div
+                  key={f.label}
+                  className="grid grid-cols-[7rem_1fr] gap-x-4 border-b border-hairline py-3 text-sm sm:grid-cols-[9rem_1fr]"
+                >
+                  <dt className="text-paper-dim">{f.label}</dt>
+                  <dd className="text-paper">{f.value}</dd>
+                </div>
+              ))}
+            </dl>
           </motion.div>
-
-          <div className="flex flex-col justify-center gap-5">
-            {profile.identity.map((text, i) => (
-              <motion.p
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.5, delay: i * 0.08 }}
-                className="border-l-2 border-signal-red/70 bg-ink-panel/60 py-3 pl-5 text-base leading-relaxed text-paper/95 sm:text-lg"
-              >
-                {text}
-              </motion.p>
-            ))}
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="mt-2 flex flex-wrap gap-2"
-            >
-              {["Multi-Agent Systems", "RAG", "LLM Evaluation", "Computer Vision", "Observability"].map(
-                (t) => (
-                  <span
-                    key={t}
-                    className="border border-hairline bg-ink-soft/60 px-2.5 py-1 font-mono text-[10px] tracking-[0.15em] text-paper-dim uppercase"
-                  >
-                    {t}
-                  </span>
-                )
-              )}
-            </motion.div>
-          </div>
         </div>
-        <WebDivider className="mt-16" />
       </div>
     </section>
-  );
-}
-
-function Silhouette() {
-  return (
-    <svg
-      viewBox="0 0 400 500"
-      className="h-full w-full"
-      preserveAspectRatio="xMidYMax slice"
-      aria-hidden
-    >
-      <defs>
-        <radialGradient id="spot" cx="50%" cy="20%" r="65%">
-          <stop offset="0%" stopColor="#1c2140" />
-          <stop offset="100%" stopColor="#08080a" />
-        </radialGradient>
-        <linearGradient id="rimRed" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="var(--color-signal-red)" stopOpacity="0.9" />
-          <stop offset="100%" stopColor="var(--color-signal-red)" stopOpacity="0" />
-        </linearGradient>
-        <linearGradient id="rimBlue" x1="1" y1="0" x2="0" y2="0">
-          <stop offset="0%" stopColor="var(--color-web-blue)" stopOpacity="0.9" />
-          <stop offset="100%" stopColor="var(--color-web-blue)" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <rect width="400" height="500" fill="url(#spot)" />
-      <path
-        d="M200 120 c34 0 56 26 56 60 c0 22 -10 38 -22 48 c34 12 60 40 66 84 l14 130 h-228 l14 -130 c6 -44 32 -72 66 -84 c-12 -10 -22 -26 -22 -48 c0 -34 22 -60 56 -60 z"
-        fill="#0c0c10"
-        stroke="#1c1d24"
-        strokeWidth="1.5"
-      />
-      <rect x="60" width="70" height="500" fill="url(#rimRed)" />
-      <rect x="270" width="70" height="500" fill="url(#rimBlue)" />
-      <g stroke="var(--color-hairline)" strokeWidth="1" opacity="0.5">
-        <path d="M0 60 L400 60" />
-        <path d="M0 60 L120 220" />
-        <path d="M400 60 L280 220" />
-      </g>
-    </svg>
   );
 }

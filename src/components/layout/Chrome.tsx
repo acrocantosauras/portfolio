@@ -6,8 +6,7 @@ import { RecruiterModeProvider } from "./RecruiterModeContext";
 import { IntroProvider } from "@/components/intro/IntroSequence";
 import { Header } from "./Header";
 import { RecruiterDrawer } from "./RecruiterDrawer";
-import { FilmGrain } from "./FilmGrain";
-import { ScrollProgress } from "./ScrollProgress";
+import { Cursor } from "./Cursor";
 import { SpiderSense } from "./SpiderSense";
 
 export function Chrome({ children }: { children: ReactNode }) {
@@ -19,9 +18,8 @@ export function Chrome({ children }: { children: ReactNode }) {
     <MotionConfig reducedMotion="user">
       <RecruiterModeProvider>
         <IntroProvider>
-          <FilmGrain />
+          <Cursor />
           <SpiderSense />
-          <ScrollProgress />
           <Header />
           <RecruiterDrawer />
           {children}

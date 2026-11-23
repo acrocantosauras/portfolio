@@ -4,8 +4,8 @@
 export const profile = {
   name: "Meet Jadhav",
   role: "AI / Backend Engineer",
-  tagline: "Building intelligent systems that reason, retrieve, execute and observe.",
-  location: "Pune, India",
+  tagline: "I build the backend behind LLM apps, and the tests that stop them breaking.",
+  location: "Pune, Maharashtra",
   phone: "+91-7397846178",
   email: "meetjadhav2003@gmail.com",
   linkedin: "https://linkedin.com/in/meet-jadhav-05a64b250",
@@ -13,14 +13,18 @@ export const profile = {
   github: "https://github.com/acrocantosauras",
   githubLabel: "github.com/acrocantosauras",
   githubLabelShort: "github.com/acrocantosauras",
+  portfolioUrl: "https://portfolio.meetjadhav2003.workers.dev",
   resumeUrl: "/resume/Meet_Jadhav_Resume.pdf",
+  seeking: "Seeking AI / backend internships and junior roles.",
+  // Source: Meet_Jadhav_Resume_ATS_Safe.pdf (Nov 2026). Keep wording in line with the resume.
+  // Written in first person on purpose. Every claim still traces to the resume.
   identity: [
-    "Engineer focused on AI systems and backend infrastructure — multi-agent orchestration, retrieval pipelines, evaluation, and observability. I build the plumbing that makes LLMs behave like production software.",
-    "Currently building AegisForge, a production-grade multi-agent AI platform: FastAPI, LangGraph, pgvector, Redis, OpenTelemetry — the full systems stack wrapped around language models.",
-    "Industry experience in computer vision: real-time video analytics, detection and tracking pipelines with YOLO and OpenCV. Comfortable on both sides — the model and the system serving it.",
+    "Most LLM demos work once. I like the part after that: the queues, retries and tests that decide whether the thing survives real use.",
+    "Right now I'm building AegisForge. It checks a plan an LLM wrote before running anything, runs the steps in order, and picks up where it stopped if a worker dies. It has 773 tests so far, including ones that simulate a Redis outage and a worker crash.",
+    "Before that I built a platform that scores LLM answers and fails the build when quality drops, and a RAG app that answers from your own documents with citations. I finished my B.E. in Electronics and Telecommunication in 2025, and spent a month at Uchit Technology on video analytics models.",
   ],
   summary:
-    "AI / Backend engineer building production-grade multi-agent systems — LangGraph orchestration, RAG, LLM evaluation and full observability. Computer vision experience with real-time video analytics. Microsoft Azure AI-900 certified.",
+    "AI / Backend engineer (B.E., 2025) in Pune who builds reliable, tested LLM systems in Python. Built a checkpointed multi-agent orchestrator, an LLM evaluation platform with CI quality gates, and a full-stack RAG application, each with automated tests, CI and Docker setups. Seeking AI / backend internships and junior roles.",
 } as const;
 
 export type SkillGroup = {
@@ -30,65 +34,42 @@ export type SkillGroup = {
   featured?: boolean;
 };
 
+// Mirrors the TECHNICAL SKILLS block of the current resume (Nov 2026).
 export const skillGroups: SkillGroup[] = [
   {
-    id: "ai-ml",
-    label: "AI / ML",
+    id: "ai-llm",
+    label: "AI / LLM",
     featured: true,
     items: [
       "LangGraph",
-      "Multi-Agent Orchestration",
-      "RAG",
       "MCP",
-      "LLM Evaluation",
-      "OpenAI / Anthropic APIs",
-      "NLP",
-      "Hugging Face",
-      "PyTorch",
+      "RAG",
+      "LLM evaluation (LLM-as-a-judge, NLI)",
+      "Sentence Transformers",
+      "OpenAI API",
     ],
   },
   {
-    id: "backend",
-    label: "Backend",
+    id: "backend-data",
+    label: "Backend & Data",
     featured: true,
-    items: ["Python", "FastAPI", "SQLAlchemy", "PostgreSQL", "pgvector", "Redis", "Alembic", "JWT Auth"],
+    items: ["FastAPI", "REST APIs", "SQLAlchemy", "Alembic", "PostgreSQL", "pgvector", "Redis", "arq", "JWT"],
   },
   {
-    id: "frontend",
-    label: "Frontend",
-    items: ["TypeScript", "React", "Next.js", "Vite", "HTML/CSS"],
-  },
-  {
-    id: "data",
-    label: "Data",
-    items: ["PostgreSQL", "pgvector", "SQL", "Alembic Migrations", "Embeddings", "Vector Search"],
-  },
-  {
-    id: "infrastructure",
-    label: "Infrastructure",
+    id: "testing-ops",
+    label: "Testing & Ops",
     featured: true,
-    items: ["Docker", "GitHub Actions CI/CD", "Prometheus", "Grafana", "OpenTelemetry", "Structured Logging"],
-  },
-  {
-    id: "vision",
-    label: "Computer Vision",
-    featured: true,
-    items: ["YOLO", "OpenCV", "Object Tracking", "RTSP", "Real-Time Analytics"],
+    items: ["pytest", "ruff", "mypy", "GitHub Actions", "Docker Compose", "Prometheus", "Grafana", "OpenTelemetry", "Git"],
   },
   {
     id: "languages",
     label: "Languages",
-    items: ["Python", "TypeScript", "JavaScript", "SQL", "HTML/CSS"],
+    items: ["Python", "TypeScript", "SQL"],
   },
   {
-    id: "testing",
-    label: "Quality & Testing",
-    items: ["pytest", "Unit Testing", "Quality Gates", "Regression Detection", "Rate Limiting", "Docker Compose"],
-  },
-  {
-    id: "tools",
-    label: "Tools",
-    items: ["Git", "GitHub", "Postman", "VS Code", "PyCharm", "Azure AI-900"],
+    id: "frontend",
+    label: "Frontend",
+    items: ["React", "Next.js"],
   },
 ];
 
@@ -262,30 +243,23 @@ export const projects: Project[] = [
     codename: "SYS.01",
     title: "AEGISFORGE",
     subtitle: "MULTI-AGENT AI PLATFORM",
-    period: "2025 — Present",
+    period: "2026 — Present",
     status: "flagship",
     oneLiner:
-      "Production-grade multi-agent AI platform — agents that plan, delegate, retrieve, use tools, and evaluate their own output before anything ships.",
+      "A FastAPI and LangGraph orchestrator that validates LLM-generated plans and runs them as dependency-ordered task graphs, with retries, circuit breakers and resumable checkpoints.",
     stack: [
       "Python",
       "FastAPI",
-      "Next.js",
       "LangGraph",
       "PostgreSQL",
-      "pgvector",
       "Redis",
-      "Docker",
       "MCP",
-      "OpenAI / Anthropic",
-      "OpenTelemetry",
-      "Prometheus",
-      "Grafana",
+      "Docker",
     ],
     summary: [
-      "AegisForge is a production-oriented multi-agent AI platform designed to understand requests, plan work, delegate to specialized agents, retrieve private knowledge, use tools, process information, evaluate results, and maintain state across workflows.",
-      "A LangGraph orchestration core coordinates specialist agents — research, knowledge/RAG, code, vision, evaluation, analysis, synthesis — connected through a Model Context Protocol tool layer with structured outputs and checkpointed state.",
-      "The backend runs FastAPI on PostgreSQL with pgvector for private-knowledge retrieval and Redis for workflow state. The Next.js frontend is a mission-control view over the agent graph.",
-      "Phases 0–5 are complete and baselined; Phase 6 reliability/hardening work is substantially implemented. Current focus: final validation, concurrency and failure testing, and a performance baseline. OpenTelemetry, Prometheus, and Grafana cover observability.",
+      "AegisForge is a multi-agent AI orchestration platform. A FastAPI and LangGraph orchestrator validates LLM-generated plans (schema, dependency and cycle checks) and runs them as dependency-ordered task graphs with bounded parallelism, retries and timeouts.",
+      "Reliability is designed in: a per-tool circuit breaker, a Redis job queue with heartbeat-based claim recovery, and per-task PostgreSQL checkpoints that resume a run without re-running finished tasks.",
+      "Tool access is deny-by-default with approval gates, and MCP risk levels are read from server config. The suite has 773 pytest tests (78% coverage), including failure-injection tests for a Redis outage and a worker crash.",
     ],
     architecture: {
       nodes: [
@@ -332,22 +306,17 @@ export const projects: Project[] = [
     ],
     testing: [
       {
-        title: "Reliability hardening (Phase 6)",
+        title: "773 pytest tests, 78% coverage",
         detail:
-          "Concurrency and failure-path testing, final validation, and a performance baseline close out the hardening phase.",
+          "Covers plan validation, task-graph execution, permissions and approval gates.",
       },
       {
-        title: "Evaluation-driven",
+        title: "Failure injection",
         detail:
-          "Agent outputs pass through the evaluation layer — results that don't meet criteria get reworked, not released.",
+          "Tests that simulate a Redis outage and a worker crash, to verify the run recovers from its checkpoints.",
       },
     ],
-    observability: [
-      { title: "OpenTelemetry", detail: "Distributed traces across API, graph, and agent boundaries." },
-      { title: "Prometheus", detail: "Run metrics, queue depth, agent latency exposed for scraping." },
-      { title: "Grafana", detail: "Dashboards for workflow health and agent performance." },
-    ],
-    links: [{ label: "GitHub Profile", href: "https://github.com/acrocantosauras" }],
+    links: [{ label: "aegisforge on GitHub", href: "https://github.com/acrocantosauras/aegisforge" }],
   },
   {
     slug: "llm-evaluation-platform",
@@ -357,13 +326,12 @@ export const projects: Project[] = [
     period: "2025 – 2026",
     status: "active",
     oneLiner:
-      "Quality gates and regression detection that stop a bad model change before it ships — 215 automated tests, CI-enforced.",
-    stack: ["Python", "FastAPI", "PostgreSQL", "Redis / arq", "Next.js", "Prometheus", "Grafana", "OpenTelemetry", "Docker"],
+      "Scores LLM and RAG outputs and fails the build when quality regresses — 215 automated tests at 83% coverage.",
+    stack: ["Python", "FastAPI", "PostgreSQL", "Redis", "arq", "Next.js"],
     summary: [
-      "A production-oriented LLM/RAG evaluation platform measuring answer quality, hallucination, faithfulness, and retrieval precision/recall — enforcing quality gates and metric-aware regression detection before a change can ship.",
-      "Async batch evaluation runs on Redis/arq workers, with LLM-as-a-judge scoring and API-key authentication guarding every call.",
-      "A Next.js dashboard surfaces results in real time. Prometheus and OpenTelemetry are wired in for observability end to end.",
-      "215 automated tests back the system. A production Docker Compose setup is validated via GitHub Actions CI, where quality gates fail the build on regression.",
+      "A platform that scores LLM and RAG outputs on relevance, hallucination (NLI), faithfulness, and retrieval precision and recall. Async batch jobs run on Redis and arq, with hashed, project-scoped API keys.",
+      "Quality gates compare against a baseline and apply metric-aware regression detection. A GitHub Actions job fails the build when scores fall below thresholds.",
+      "215 automated tests (83% coverage), with CI that runs lint and the full suite against real PostgreSQL and Redis.",
     ],
     architecture: {
       nodes: [
@@ -405,15 +373,10 @@ export const projects: Project[] = [
       },
     ],
     testing: [
-      { title: "215 automated tests", detail: "pytest suite covering evaluation logic, API contracts, and worker behavior." },
-      { title: "CI-enforced gates", detail: "Regressions fail the build, not just a warning." },
+      { title: "215 automated tests, 83% coverage", detail: "Covers evaluation logic, API contracts, and worker behavior." },
+      { title: "CI against real services", detail: "CI runs lint and the full suite against real PostgreSQL and Redis, and fails the build on a quality regression." },
     ],
-    observability: [
-      { title: "Prometheus metrics", detail: "Service and evaluation-run metrics scraped for dashboards and alerting." },
-      { title: "OpenTelemetry tracing", detail: "Distributed traces across API, queue, and worker boundary." },
-      { title: "Grafana dashboards", detail: "Regression trends and system health over time." },
-    ],
-    links: [{ label: "GitHub Profile", href: "https://github.com/acrocantosauras" }],
+    links: [{ label: "llm-evaluation-pipeline on GitHub", href: "https://github.com/acrocantosauras/llm-evaluation-pipeline" }],
   },
   {
     slug: "ai-knowledge-assistant",
@@ -423,13 +386,12 @@ export const projects: Project[] = [
     period: "2026",
     status: "active",
     oneLiner:
-      "A full-stack RAG assistant that answers from your own documents, with source citations attached to every answer.",
-    stack: ["Python", "FastAPI", "PostgreSQL / pgvector", "React", "TypeScript", "Docker", "JWT"],
+      "A full-stack RAG app that ingests your documents and returns streaming, citation-backed answers using pgvector similarity search.",
+    stack: ["Python", "FastAPI", "PostgreSQL", "pgvector", "React", "TypeScript", "Docker"],
     summary: [
-      "A full-stack RAG knowledge assistant built end-to-end — FastAPI backend, PostgreSQL with pgvector for semantic search, and a React/TypeScript frontend.",
-      "Users upload documents and get LLM-powered answers grounded in their own content, with source citations attached to every answer.",
-      "JWT authentication with Argon2 password hashing protects the system; pipelines handle PDF, TXT, and DOCX ingestion.",
-      "Built for production readiness: Prometheus metrics, health probes, Alembic migrations, Docker Compose, and CI.",
+      "A full-stack RAG application that ingests PDF, TXT and DOCX files and returns streaming, citation-backed answers using pgvector similarity search.",
+      "The API is secured with JWT, Argon2 password hashing, per-user data isolation and rate limiting.",
+      "150+ backend tests, CI, Alembic migrations, Docker Compose and a deployment smoke-test script.",
     ],
     architecture: {
       nodes: [
@@ -471,14 +433,10 @@ export const projects: Project[] = [
       },
     ],
     testing: [
-      { title: "Production-readiness checks", detail: "Health probes and CI validate deployability, not just local runnability." },
-      { title: "Migration-safe schema", detail: "Alembic keeps the schema versioned and reproducible." },
+      { title: "150+ backend tests", detail: "Backed by CI that runs on every change." },
+      { title: "Deployable, not just runnable", detail: "Alembic migrations, Docker Compose and a deployment smoke-test script." },
     ],
-    observability: [
-      { title: "Prometheus metrics", detail: "Ingestion and query performance metrics." },
-      { title: "Health probes", detail: "Liveness/readiness endpoints for orchestration." },
-    ],
-    links: [{ label: "GitHub Profile", href: "https://github.com/acrocantosauras" }],
+    links: [{ label: "ai-knowledge-assistant on GitHub", href: "https://github.com/acrocantosauras/ai-knowledge-assistant" }],
   },
   {
     slug: "jarvis",
@@ -557,13 +515,13 @@ export const experience: Experience[] = [
   {
     id: "uchit",
     company: "Uchit Technology",
-    role: "AI / Video Analytics Trainee",
-    period: "September – October 2026",
+    role: "Trainee",
+    period: "October 2026",
     location: "Pune, India",
     kind: "industry",
     domain: "AI VIDEO ANALYTICS",
     points: [
-      "One-month trainee experience supporting AI model-training and reinforcement-learning workflows for AI video analytics, with exposure to the Uchit AI Box and related hardware.",
+      "Supported AI model-training and reinforcement-learning workflows for video analytics on the Uchit AI Box.",
     ],
   },
 ];

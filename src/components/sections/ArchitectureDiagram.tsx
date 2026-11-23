@@ -96,9 +96,7 @@ export function ArchitectureDiagram({
         >
           {usedGroups.map((group, ci) => (
             <div key={group} className="flex flex-col items-center gap-6">
-              <p className="font-mono text-[10px] tracking-[0.25em] text-paper-dim uppercase">
-                {GROUP_LABEL[group]}
-              </p>
+              <p className="text-xs tracking-wide text-paper-dim">{GROUP_LABEL[group]}</p>
               <div className="flex flex-1 flex-col justify-center gap-6">
                 {columns[ci].map((node) => (
                   <div
@@ -109,7 +107,6 @@ export function ArchitectureDiagram({
                     tabIndex={0}
                     role="button"
                     aria-pressed={activeId === node.id}
-                    data-sense="true"
                     onMouseEnter={() => setActiveId(node.id)}
                     onFocus={() => setActiveId(node.id)}
                     onClick={() => setActiveId((cur) => (cur === node.id ? null : node.id))}
@@ -132,15 +129,11 @@ export function ArchitectureDiagram({
       <div className="mt-6 min-h-[64px] border border-hairline bg-ink-panel/60 p-4">
         {activeNode ? (
           <>
-            <p className="font-mono text-[10px] tracking-[0.25em] text-signal-red-bright uppercase">
-              {activeNode.label}
-            </p>
+            <p className="text-sm font-medium text-paper">{activeNode.label}</p>
             <p className="mt-1 text-sm text-paper/90">{activeNode.detail}</p>
           </>
         ) : (
-          <p className="font-mono text-xs text-paper-dim">
-            Hover or tap a node to see how it fits.
-          </p>
+          <p className="text-sm text-paper-dim">Hover or tap a node to see how it fits.</p>
         )}
       </div>
     </div>

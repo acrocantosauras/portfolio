@@ -1,165 +1,178 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { motion } from "motion/react";
-import { useReducedMotionSafe } from "@/lib/reduced-motion";
-import { GraduationCap, Award, Building2, FolderGit2 } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { certifications, experience } from "@/data/resume";
+import { ChapterMark } from "@/components/ui/ChapterMark";
+import { certifications, education, experience } from "@/data/resume";
 import { cn } from "@/lib/utils";
 
 const uchit = experience.find((e) => e.id === "uchit")!;
+const degree = education.find((e) => e.id === "edu-degree")!;
+const school = education.find((e) => e.id === "edu-highschool")!;
+const EASE = [0.16, 1, 0.3, 1] as const;
 
 type Entry = {
   id: string;
-  icon: typeof GraduationCap;
   period: string;
   title: string;
   org: string;
-  location?: string;
   detail?: string;
-  tone: "red" | "blue";
 };
 
+// Newest first. Every line traces back to the resume.
 const ENTRIES: Entry[] = [
   {
     id: "uchit",
-    icon: Building2,
     period: uchit.period,
     title: uchit.role,
-    org: uchit.company,
-    location: uchit.location,
+    org: `${uchit.company} · ${uchit.location}`,
     detail: uchit.points[0],
-    tone: "red",
   },
   {
     id: "independent",
-    icon: FolderGit2,
-    period: "Aug 2025 – Present",
-    title: "Independent Systems Buildout",
+    period: "2025 – Present",
+    title: "Independent project work",
     org: "Self-directed",
-    detail: "AegisForge, LLM Evaluation Platform, AI Knowledge Assistant, J.A.R.V.I.S. — designed, built and hardened solo.",
-    tone: "red",
-  },
-  {
-    id: "edu-degree",
-    icon: GraduationCap,
-    period: "Aug 2021 – May 2025",
-    title: "B.E., Electronics & Telecommunication",
-    org: "Shrimati Kashibai Navale College of Engineering",
-    location: "Pune, Maharashtra",
-    tone: "blue",
-  },
-  {
-    id: "edu-highschool",
-    icon: GraduationCap,
-    period: "2021",
-    title: "Higher Secondary (Science) — 86.66%",
-    org: "MGSK Gujarati High School",
-    location: "Sangli, Maharashtra",
-    tone: "blue",
+    detail:
+      "AegisForge, the LLM Evaluation Platform and the AI Knowledge Assistant: each built with automated tests, CI and Docker setups.",
   },
   ...certifications.map((c, i) => ({
     id: `cert-${i}`,
-    icon: Award,
-    period: c.org,
+    period: c.org.split(", ").pop() ?? "",
     title: c.title,
-    org: "Certification",
-    tone: "blue" as const,
+    org: c.org.split(", ")[0],
   })),
+  {
+    id: "degree",
+    period: degree.period,
+    title: degree.title,
+    org: `${degree.org} · ${degree.location}`,
+  },
+  {
+    id: "school",
+    period: school.period,
+    title: school.title,
+    org: `${school.org} · ${school.location}`,
+  },
 ];
 
+// Each panel is a different shape and colour, like frames on a comic page.
+const FRAMES = [
+  { edge: "panel-a", surface: "bg-[#1b0f18] text-paper", cap: "bg-gold text-ink" },
+  { edge: "panel-b", surface: "bg-paper text-dawn-ink", cap: "bg-dawn-ink text-paper" },
+  { edge: "panel-c", surface: "bg-[#0e2a63] text-paper", cap: "bg-gold text-ink" },
+  { edge: "panel-b", surface: "bg-ink-panel text-paper", cap: "bg-signal-red text-paper" },
+] as const;
+
+const year = (period: string) => period.match(/\d{4}/)?.[0] ?? period;
+
+/**
+ * Journey: a sequential storytelling rail. The chapters are panels on one
+ * horizontal strip you swipe or scroll across (or step with the arrows), each a
+ * different shape and colour, each with a caption box like a comic frame. The year
+ * is set huge and cropped. On every width it scrolls sideways; it is a real
+ * scrollable region you can also focus and move with the arrow keys.
+ */
 export function Journey() {
-  const reduceMotion = useReducedMotionSafe();
+  const rail = useRef<HTMLDivElement>(null);
+  const [progress, setProgress] = useState(0);
+
+  function step(dir: 1 | -1) {
+    const el = rail.current;
+    if (!el) return;
+    const panel = el.querySelector<HTMLElement>("[data-panel]");
+    el.scrollBy({ left: dir * ((panel?.offsetWidth ?? 380) + 24), behavior: "smooth" });
+  }
 
   return (
-    <section id="journey" className="relative bg-ink-soft py-24 sm:py-32">
-      <div className="mx-auto max-w-5xl px-5 sm:px-8">
-        <SectionHeading eyebrow="Timeline / Service Record" title="THE JOURNEY" />
+    <section id="journey" className="surface-overcast relative overflow-hidden py-28 sm:py-40">
+      <ChapterMark n="06" className="-top-[0.1em] -right-[0.08em] text-paper/[0.08]" />
+      <div className="relative">
+        <div className="mx-auto flex max-w-7xl items-end justify-between gap-6 px-6 sm:px-12">
+          <SectionHeading title="JOURNEY" />
+          <div className="mb-3 hidden items-center gap-3 sm:flex">
+            <button
+              type="button"
+              onClick={() => step(-1)}
+              aria-label="Previous panel"
+              className="flex h-11 w-11 items-center justify-center border border-paper/40 text-paper transition-colors hover:border-signal-red-bright hover:text-signal-red-bright"
+            >
+              <ArrowLeft size={18} />
+            </button>
+            <button
+              type="button"
+              onClick={() => step(1)}
+              aria-label="Next panel"
+              className="flex h-11 w-11 items-center justify-center border border-paper/40 text-paper transition-colors hover:border-signal-red-bright hover:text-signal-red-bright"
+            >
+              <ArrowRight size={18} />
+            </button>
+          </div>
+        </div>
 
-        <div className="relative mt-16">
-          <div
-            className="absolute top-0 bottom-0 left-[19px] w-px sm:left-1/2 sm:-translate-x-1/2"
-            aria-hidden
-          >
-            {/* the strand draws itself down the timeline as it enters view */}
-            <motion.div
-              initial={reduceMotion ? false : { scaleY: 0 }}
-              whileInView={{ scaleY: 1 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 1.3, ease: "easeInOut" }}
-              className="h-full w-full origin-top bg-gradient-to-b from-signal-red via-hairline to-web-blue"
+        <div
+          ref={rail}
+          tabIndex={0}
+          role="region"
+          aria-label="Timeline of education and experience. Scroll sideways."
+          onScroll={(e) => {
+            const el = e.currentTarget;
+            const max = el.scrollWidth - el.clientWidth;
+            setProgress(max > 0 ? el.scrollLeft / max : 0);
+          }}
+          className="mt-12 flex snap-x snap-proximity gap-6 overflow-x-auto px-6 pb-6 [scrollbar-width:none] sm:px-12 [&::-webkit-scrollbar]:hidden"
+        >
+          {ENTRIES.map((item, i) => {
+            const f = FRAMES[i % FRAMES.length];
+            return (
+              <motion.article
+                key={item.id}
+                data-panel
+                initial={{ opacity: 0, x: 40 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "0px 0px 0px -60px" }}
+                transition={{ duration: 0.7, delay: Math.min(i, 3) * 0.06, ease: EASE }}
+                className={cn(
+                  "relative flex min-h-[27rem] w-[82vw] shrink-0 snap-start flex-col justify-end overflow-hidden px-7 pt-10 pb-12 sm:w-[26rem]",
+                  f.edge,
+                  f.surface
+                )}
+              >
+                {/* the year, huge and cropped by the panel */}
+                <span
+                  aria-hidden
+                  className="stroke-text pointer-events-none absolute -top-6 -left-3 font-display text-[11rem] leading-none opacity-30"
+                >
+                  {year(item.period)}
+                </span>
+                <span aria-hidden className="absolute top-5 right-6 font-mono text-[11px] opacity-60">
+                  {i + 1}/{ENTRIES.length}
+                </span>
+
+                <div className="relative">
+                  <p className={cn("inline-block px-3 py-1 font-display text-lg tracking-wider", f.cap)}>
+                    {item.period}
+                  </p>
+                  <h3 className="mt-4 text-2xl leading-tight font-medium sm:text-[1.7rem]">{item.title}</h3>
+                  <p className="mt-2 text-sm opacity-75">{item.org}</p>
+                  {item.detail && <p className="mt-4 text-[15px] leading-relaxed opacity-90">{item.detail}</p>}
+                </div>
+              </motion.article>
+            );
+          })}
+          <div aria-hidden className="w-6 shrink-0 sm:w-12" />
+        </div>
+
+        {/* progress along the strip */}
+        <div className="mx-auto mt-4 max-w-7xl px-6 sm:px-12" aria-hidden>
+          <div className="relative h-px w-full bg-paper/25">
+            <div
+              className="absolute top-1/2 h-[3px] -translate-y-1/2 bg-signal-red-bright"
+              style={{ width: `${12 + progress * 88}%` }}
             />
           </div>
-
-          <ol className="flex flex-col gap-10">
-            {ENTRIES.map((item, i) => {
-              const Icon = item.icon;
-              const alignRight = i % 2 === 1;
-              return (
-                <motion.li
-                  key={item.id}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-100px" }}
-                  transition={{ duration: 0.5, delay: (i % 4) * 0.06 }}
-                  className={cn(
-                    "relative flex items-start gap-5 pl-12 sm:pl-0",
-                    "sm:grid sm:grid-cols-2 sm:gap-10"
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "absolute top-1 left-0 z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 bg-ink sm:left-1/2 sm:-translate-x-1/2",
-                      item.tone === "red"
-                        ? "border-signal-red-bright text-signal-red-bright"
-                        : "border-web-blue-bright text-web-blue-bright"
-                    )}
-                  >
-                    <motion.span
-                      className="flex items-center justify-center"
-                      initial={reduceMotion ? false : { scale: 0.3, opacity: 0 }}
-                      whileInView={{ scale: 1, opacity: 1 }}
-                      viewport={{ once: true, margin: "-100px" }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 320,
-                        damping: 18,
-                        delay: 0.15 + (i % 4) * 0.08,
-                      }}
-                    >
-                      <Icon size={16} />
-                    </motion.span>
-                  </div>
-
-                  <div className={cn("hidden sm:block", alignRight && "sm:order-2")} />
-
-                  <div className={cn(!alignRight && "sm:text-right", alignRight && "sm:col-start-2")}>
-                    <div
-                      className={cn(
-                        "inline-block w-full border border-hairline bg-ink-panel/70 p-4 text-left sm:max-w-md",
-                        item.tone === "red" ? "hover:border-signal-red/60" : "hover:border-web-blue/60",
-                        "transition-colors"
-                      )}
-                    >
-                      <p className="font-mono text-[10px] tracking-[0.25em] text-paper-dim uppercase">
-                        {item.period}
-                      </p>
-                      <p className="mt-1 font-display text-xl tracking-wide text-paper">
-                        {item.title}
-                      </p>
-                      <p className="text-sm text-paper-dim">
-                        {item.org}
-                        {item.location ? ` · ${item.location}` : ""}
-                      </p>
-                      {item.detail && (
-                        <p className="mt-2 text-xs leading-relaxed text-paper/85">{item.detail}</p>
-                      )}
-                    </div>
-                  </div>
-                </motion.li>
-              );
-            })}
-          </ol>
         </div>
       </div>
     </section>

@@ -64,22 +64,31 @@ export function DisplayTitle({
             </span>
           );
         }
+        // The in-view trigger lives on the stable wrapper, not on the word that
+        // starts translated outside the clip box (an element clipped away by its
+        // parent never reports as intersecting, so it would never reveal).
         return (
-          <span
+          <motion.span
             key={`${word}-${i}`}
             aria-hidden
-            className="inline-block overflow-hidden pr-[0.16em] pb-[0.1em] align-bottom"
+            className="inline-block overflow-hidden pt-[0.04em] pr-[0.16em] pb-[0.12em] align-bottom"
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-60px" }}
           >
             <motion.span
               className={cn("block", isAccent && "accent-comic")}
-              initial={{ y: "112%" }}
-              whileInView={{ y: "0%" }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.6, delay: delay + i * 0.09, ease: EASE }}
+              variants={{
+                hidden: { y: "112%" },
+                show: {
+                  y: "0%",
+                  transition: { duration: 0.6, delay: delay + i * 0.09, ease: EASE },
+                },
+              }}
             >
               {word}
             </motion.span>
-          </span>
+          </motion.span>
         );
       })}
     </Tag>

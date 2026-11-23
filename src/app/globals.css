@@ -1,59 +1,81 @@
 @import "tailwindcss";
 
 /*
-  Design system — "Brand New Day" direction.
-  Grounded in official promo material for Spider-Man: Brand New Day (Sony, 2026):
-  - Title treatment: flat comic RED faces with a ROYAL BLUE 3D depth block, thin dark
-    outline, arced baseline; a warm GOLD subtitle layer beneath (FontVibe analysis of
-    the official logo, Jul 2026).
-  - Suit: handmade, raised black web lines over a richer textured red; red dominant,
-    blue supporting, black webbing detail (official suit-vignette coverage).
-  - Backdrop: rain-slick, grounded night-city Manhattan; wide shots that isolate the
-    hero (trailer breakdowns, No Film School / Nexus Point News).
-  - Themes: isolation, a fresh start, heightened spider-sense.
-  All artwork on this site is original — no film stills or third-party assets.
+  Design system — "Black Ink, Grey Light".
+  One rainy New York night that ends in an ordinary morning. Scroll is time:
+  ink-black and rain at the top, overcast pre-dawn in the middle, plain daylight
+  at the end.
+
+  Grounded in what is publicly documented about Spider-Man: Brand New Day's look
+  (comic-book black ink and heavy contrast, grey natural light, rain, grounded,
+  frame-within-frame composition). Colour values below are original choices —
+  nothing here claims to be the film's grade or palette. All artwork on this site
+  is original; no film stills or third-party assets.
+
+  Colour roles
+  - ink / night ......... true-black shadows, the night sections
+  - overcast ............ grey-blue weather, midtones and the pre-dawn sections
+  - paper (bone) ........ readable text on dark
+  - signal red .......... the web thread, links, primary actions, focus. Nothing else.
+  - amber ............... one warm window of human light per screen, at most
+  - dawn / dawn-ink ..... the morning sections (light surface, dark text)
 */
 
 :root {
-  --color-ink: #06070b; /* rain-slick night */
-  --color-ink-soft: #0b0d14;
-  --color-ink-panel: #11141f;
-  --color-paper: #ece6d8; /* bone, for readable copy */
-  --color-paper-dim: #b6b1a6;
-  --color-signal-red: #e01f2f; /* comic red — masthead face */
-  --color-signal-red-bright: #ff3543;
-  --color-web-blue: #2440cc; /* royal blue — depth block */
-  --color-web-blue-bright: #4567ff;
-  --color-gold: #f0b537; /* subtitle accent, sparingly */
-  --color-gold-dim: rgba(240, 181, 55, 0.55);
-  --color-amber: #e8a83c;
-  --color-hairline: rgba(236, 230, 216, 0.14);
+  --color-ink: #04060d; /* navy-black night: true black shadows with a blue cast */
+  --color-ink-soft: #090d19;
+  --color-ink-panel: #0f1424;
+  --color-overcast-deep: #121827; /* first grey of pre-dawn */
+  --color-overcast: #252d3f; /* rain-light blue-grey */
+  --color-overcast-light: #5d6b86;
+  --color-paper: #ece6d8; /* bone */
+  --color-paper-dim: #a9aab3;
+  /* Suit colours. The costume designer dyed the fabric away from pink toward an
+     orange-red, and the blue toward turquoise, so the red leans warm and the
+     blue leans bright. */
+  --color-signal-red: #e0342b;
+  --color-signal-red-bright: #ff5445; /* AA on ink */
+  --color-web-blue: #1d5fd1;
+  --color-web-blue-bright: #6b9bff;
+  /* The title card's subtitle layer. */
+  --color-gold: #f2c230;
+  --color-gold-dim: rgba(242, 194, 48, 0.55);
+  --color-amber: #e0a24a; /* a warm window in the city */
+  --color-dawn: #c9ccd0; /* morning grey */
+  --color-dawn-warm: #e6dfd0; /* morning light */
+  --color-dawn-ink: #14161b; /* text on dawn */
+  --color-signal-red-deep: #a3101c; /* red text on the light morning surfaces (AA) */
+  --color-hairline: rgba(236, 230, 216, 0.16);
+  --color-hairline-dawn: rgba(20, 22, 27, 0.22);
 }
 
 @theme inline {
   --color-ink: var(--color-ink);
   --color-ink-soft: var(--color-ink-soft);
   --color-ink-panel: var(--color-ink-panel);
+  --color-overcast-deep: var(--color-overcast-deep);
+  --color-overcast: var(--color-overcast);
+  --color-overcast-light: var(--color-overcast-light);
   --color-paper: var(--color-paper);
   --color-paper-dim: var(--color-paper-dim);
   --color-signal-red: var(--color-signal-red);
   --color-signal-red-bright: var(--color-signal-red-bright);
+  --color-signal-red-deep: var(--color-signal-red-deep);
   --color-web-blue: var(--color-web-blue);
   --color-web-blue-bright: var(--color-web-blue-bright);
   --color-gold: var(--color-gold);
   --color-gold-dim: var(--color-gold-dim);
   --color-amber: var(--color-amber);
+  --color-dawn: var(--color-dawn);
+  --color-dawn-warm: var(--color-dawn-warm);
+  --color-dawn-ink: var(--color-dawn-ink);
   --color-hairline: var(--color-hairline);
+  --color-hairline-dawn: var(--color-hairline-dawn);
   --font-display: var(--font-display);
+  --font-vision: var(--font-vision);
   --font-body: var(--font-body);
   --font-mono: var(--font-mono);
-  --animate-flicker: flicker 4s linear infinite;
-  --animate-drift: drift 40s linear infinite;
-  --animate-pulse-slow: pulse-slow 3s ease-in-out infinite;
-  --animate-marquee: marquee 30s linear infinite;
-  --animate-dust: dust 14s linear infinite;
-  --animate-spin-slow: spin 9s linear infinite;
-  --animate-blink: blink 1.6s steps(1, end) infinite;
+  --font-serif: var(--font-serif);
 }
 
 html {
@@ -79,14 +101,18 @@ html {
 
 body {
   font-family: var(--font-body);
+  font-variant-numeric: tabular-nums;
 }
 
+/* browser surfaces are themed from the palette, not left at defaults */
 ::selection {
   background: var(--color-signal-red);
   color: var(--color-paper);
 }
 
-/* thin, comic-noir scrollbar */
+* {
+  scrollbar-color: var(--color-overcast) var(--color-ink);
+}
 ::-webkit-scrollbar {
   width: 10px;
 }
@@ -94,9 +120,11 @@ body {
   background: var(--color-ink);
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(var(--color-signal-red), var(--color-web-blue));
-  border-radius: 0;
+  background: var(--color-overcast);
   border: 2px solid var(--color-ink);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-signal-red);
 }
 
 :focus-visible {
@@ -104,221 +132,153 @@ body {
   outline-offset: 3px;
 }
 
-/* ---- Texture utilities ---- */
+a {
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
 
-.halftone {
-  background-image: radial-gradient(
-    rgba(236, 230, 216, 0.5) 1px,
-    transparent 1.4px
+/* ---- Chapter surfaces: the night → morning arc ---- */
+
+/* each surface owns its text colour so a chapter reads on its own light */
+.surface-night {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+.surface-night-soft {
+  background: var(--color-ink-soft);
+  color: var(--color-paper);
+}
+/* pre-dawn: the night greys out */
+.surface-predawn {
+  background: linear-gradient(
+    to bottom,
+    var(--color-ink-soft) 0%,
+    var(--color-overcast-deep) 35%,
+    var(--color-overcast) 100%
   );
-  background-size: 5px 5px;
+  color: var(--color-paper);
+}
+.surface-overcast {
+  background: var(--color-overcast);
+  color: var(--color-paper);
+}
+/* morning: light surface, dark type */
+.surface-dawn {
+  background: var(--color-dawn);
+  color: var(--color-dawn-ink);
+}
+.surface-morning {
+  background: var(--color-dawn-warm);
+  color: var(--color-dawn-ink);
 }
 
-.grain::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.05;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
+/* ---- Frames: ink-line panels with real gutters (no soft cards) ---- */
 
-.vignette {
-  background: radial-gradient(
-    ellipse at center,
-    transparent 40%,
-    rgba(0, 0, 0, 0.75) 100%
-  );
+.frame {
+  border: 1px solid var(--color-hairline);
 }
-
-.comic-border {
+.frame-ink {
   border: 2px solid var(--color-paper);
-  box-shadow: 5px 5px 0 0 var(--color-signal-red);
+}
+.frame-dawn {
+  border: 1px solid var(--color-hairline-dawn);
 }
 
-.comic-border-blue {
-  border: 2px solid var(--color-paper);
-  box-shadow: 5px 5px 0 0 var(--color-web-blue);
-}
+/* ---- Title-card lettering ----
+   Built from what is publicly documented about the Brand New Day logo: the
+   Spider-Man name in the classic comic red-and-blue treatment, with a gold
+   subtitle layer beneath it. The logo is a custom treatment, not a downloadable
+   font, so this is an approximation drawn with a condensed display face: flat
+   red face, dark outline, blue depth block. Sizes in em so it scales with the
+   type it is applied to. */
 
-/* ---- Masthead (title-treatment) utilities ----
-   Red face sitting on a royal-blue depth block, thin dark outline —
-   echoing the official red-and-blue comic masthead. */
 .masthead {
   color: var(--color-signal-red-bright);
-  -webkit-text-stroke: 1.5px rgba(4, 4, 8, 0.9);
+  -webkit-text-stroke: 0.028em #05060b;
   paint-order: stroke fill;
   text-shadow:
-    0 2px 0 rgba(0, 0, 0, 0.85),
-    3px 5px 0 var(--color-web-blue),
-    6px 9px 0 rgba(0, 0, 0, 0.5);
+    0.01em 0.01em 0 var(--color-web-blue),
+    0.02em 0.02em 0 var(--color-web-blue),
+    0.03em 0.03em 0 var(--color-web-blue),
+    0.04em 0.04em 0 var(--color-web-blue),
+    0.05em 0.05em 0 var(--color-web-blue),
+    0.06em 0.06em 0 var(--color-web-blue),
+    0.07em 0.07em 0 #05060b,
+    0.08em 0.08em 0 #05060b;
 }
 
-.masthead-sm {
+/* smaller headings: shorter depth block */
+.accent-comic {
   color: var(--color-signal-red-bright);
-  -webkit-text-stroke: 0.8px rgba(4, 4, 8, 0.9);
+  -webkit-text-stroke: 0.03em #05060b;
   paint-order: stroke fill;
   text-shadow:
-    0 1px 0 rgba(0, 0, 0, 0.85),
-    2px 3px 0 var(--color-web-blue);
+    0.015em 0.015em 0 var(--color-web-blue),
+    0.03em 0.03em 0 var(--color-web-blue),
+    0.045em 0.045em 0 var(--color-web-blue),
+    0.06em 0.06em 0 var(--color-web-blue),
+    0.075em 0.075em 0 #05060b;
 }
 
+/* The subtitle layer: gold, set in the same condensed display face as the
+   name so it reads as lettering, not a UI label. */
 .gold-subtitle {
   color: var(--color-gold);
-  font-style: italic;
+  font-family: var(--font-display), var(--font-body);
+  text-transform: uppercase;
   letter-spacing: 0.22em;
 }
 
-/* ---- Interior display system (see ui/DisplayTitle.tsx) ----
-   Same comic-print language as .masthead-sm, but animates its blue depth
-   block into place when the heading enters view. Strategic accent only —
-   at most one word per heading. */
-.accent-comic {
-  color: var(--color-signal-red-bright);
-  -webkit-text-stroke: 0.8px rgba(4, 4, 8, 0.9);
-  paint-order: stroke fill;
-  animation: comic-settle 0.9s 0.25s ease both;
+/* Custom cursor: the native pointer is hidden only while the custom one is
+   running (fine pointers, motion allowed). Added/removed by <Cursor />. */
+html.has-custom-cursor,
+html.has-custom-cursor * {
+  cursor: none !important;
 }
 
-@keyframes comic-settle {
-  from {
-    text-shadow: 2px 3px 0 rgba(36, 64, 204, 0);
-  }
-  to {
-    text-shadow: 2px 3px 0 var(--color-web-blue);
-  }
-}
+/* ---- The suit ----
+   Handmade, simple: a red cloth with a clear sheen and raised black web lines.
+   A thin band of it is used as a divider, the way a seam of the suit would show. */
 
-/* one-shot cinematic light sweep across the hero masthead (uses @keyframes sweep) */
-.masthead-sweep {
-  display: block;
-  height: 100%;
-  width: 38%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(236, 230, 216, 0.22),
-    transparent
-  );
-  animation: sweep 1.1s 0.7s ease-in-out both;
-}
-
-/* red→blue rim lighting used on panels and silhouettes */
-.rim-red {
-  box-shadow:
-    inset 3px 0 0 -1px rgba(224, 31, 47, 0.55),
-    -18px 0 44px -24px rgba(224, 31, 47, 0.7);
-}
-
-.rim-blue {
-  box-shadow:
-    inset -3px 0 0 -1px rgba(36, 64, 204, 0.6),
-    18px 0 44px -24px rgba(36, 64, 204, 0.75);
-}
-
-/* raised-web texture: thin dark web lines over a surface, used sparingly */
 .suit-weave {
+  background-color: var(--color-signal-red);
   background-image:
+    /* sheen: a clear print over the cloth, brighter on one side */
+    linear-gradient(115deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 35%, rgba(0, 0, 0, 0.18) 100%),
+    /* raised web lines: a dark line with a pale edge, so it reads as relief */
     repeating-linear-gradient(
       45deg,
-      rgba(0, 0, 0, 0.35) 0 1px,
-      transparent 1px 9px
+      rgba(0, 0, 0, 0.55) 0 1.5px,
+      rgba(255, 255, 255, 0.14) 1.5px 2.5px,
+      transparent 2.5px 11px
     ),
     repeating-linear-gradient(
       -45deg,
-      rgba(0, 0, 0, 0.35) 0 1px,
-      transparent 1px 9px
+      rgba(0, 0, 0, 0.55) 0 1.5px,
+      rgba(255, 255, 255, 0.14) 1.5px 2.5px,
+      transparent 2.5px 11px
     );
 }
 
-/* ---- Keyframes ---- */
-
-@keyframes flicker {
-  0%,
-  19%,
-  21%,
-  23%,
-  25%,
-  54%,
-  56%,
-  100% {
-    opacity: 1;
-  }
-  20%,
-  22%,
-  24%,
-  55% {
-    opacity: 0.4;
-  }
+.suit-weave-blue {
+  background-color: var(--color-web-blue);
+  background-image:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 35%, rgba(0, 0, 0, 0.2) 100%),
+    repeating-linear-gradient(
+      45deg,
+      rgba(0, 0, 0, 0.5) 0 1.5px,
+      rgba(255, 255, 255, 0.12) 1.5px 2.5px,
+      transparent 2.5px 11px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(0, 0, 0, 0.5) 0 1.5px,
+      rgba(255, 255, 255, 0.12) 1.5px 2.5px,
+      transparent 2.5px 11px
+    );
 }
 
-@keyframes drift {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(-50%, 2%, 0);
-  }
-}
-
-@keyframes pulse-slow {
-  0%,
-  100% {
-    opacity: 0.35;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.9;
-    transform: scale(1.06);
-  }
-}
-
-@keyframes marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-@keyframes dust {
-  0% {
-    transform: translate3d(0, 0, 0);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.7;
-  }
-  90% {
-    opacity: 0.5;
-  }
-  100% {
-    transform: translate3d(-40px, -160px, 0);
-    opacity: 0;
-  }
-}
-
-@keyframes blink {
-  0%,
-  60% {
-    opacity: 1;
-  }
-  61%,
-  100% {
-    opacity: 0.25;
-  }
-}
-
-@keyframes sweep {
-  0% {
-    transform: translateX(-130%) skewX(-16deg);
-  }
-  100% {
-    transform: translateX(230%) skewX(-16deg);
-  }
-}
+/* ---- Keyframes (only what is still used) ---- */
 
 /* pipeline signal traces — dashes running along a path (SVG) */
 @keyframes dash-run {
@@ -349,4 +309,76 @@ body {
 
 .trace-drop {
   animation: drop 1.3s linear infinite;
+}
+
+/* a red aircraft/bridge light: one slow blink, nothing else in the scenes loops */
+@keyframes beacon {
+  0%,
+  55% {
+    opacity: 1;
+  }
+  56%,
+  100% {
+    opacity: 0.25;
+  }
+}
+.beacon {
+  animation: beacon 2.4s steps(1, end) infinite;
+}
+
+/* ---- Comic print language (used selectively, never as a costume) ---- */
+
+/* oversized outlined type: an empty letterform, cropped by its section */
+.stroke-text {
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 2px currentColor;
+}
+.stroke-text-thin {
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1.2px currentColor;
+}
+
+/* halftone: a printed dot screen, fading out along one direction */
+.halftone {
+  background-image: radial-gradient(currentColor 1.1px, transparent 1.6px);
+  background-size: 7px 7px;
+}
+.halftone-fade-b {
+  -webkit-mask-image: linear-gradient(to bottom, black, transparent);
+  mask-image: linear-gradient(to bottom, black, transparent);
+}
+.halftone-fade-l {
+  -webkit-mask-image: linear-gradient(to left, black, transparent);
+  mask-image: linear-gradient(to left, black, transparent);
+}
+
+/* surveillance texture: fine horizontal scan lines */
+.scanlines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.045) 0 1px,
+    transparent 1px 3px
+  );
+}
+
+/* blueprint paper for the dossier */
+.blueprint {
+  background-color: #cfd6df;
+  background-image:
+    linear-gradient(rgba(29, 95, 209, 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(29, 95, 209, 0.16) 1px, transparent 1px),
+    linear-gradient(rgba(29, 95, 209, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(29, 95, 209, 0.07) 1px, transparent 1px);
+  background-size: 96px 96px, 96px 96px, 24px 24px, 24px 24px;
+}
+
+/* diagonal-edged panels */
+.panel-a {
+  clip-path: polygon(0 0, 100% 0, 100% 91%, 0 100%);
+}
+.panel-b {
+  clip-path: polygon(0 5%, 100% 0, 100% 100%, 0 95%);
+}
+.panel-c {
+  clip-path: polygon(4% 0, 100% 0, 96% 100%, 0 100%);
 }

@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 const NAV = [
   { href: "#aegisforge", label: "Work" },
   { href: "#experience", label: "Experience" },
-  { href: "#missions", label: "Systems" },
+  { href: "#missions", label: "Projects" },
   { href: "#workshop", label: "Skills" },
   { href: "#identity", label: "About" },
   { href: "#contact", label: "Contact" },
@@ -54,11 +54,11 @@ export function Header() {
     <motion.header
       initial={{ y: -80 }}
       animate={{ y: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-colors duration-300",
+        "fixed inset-x-0 top-0 z-50 text-paper transition-colors duration-300",
         scrolled
-          ? "border-b border-hairline bg-ink/95 backdrop-blur-sm"
+          ? "border-b border-hairline bg-ink/95"
           : "border-b border-transparent bg-transparent"
       )}
     >
@@ -66,33 +66,27 @@ export function Header() {
         <a
           href="#top"
           className="flex items-center gap-2.5"
-          data-sense="true"
           aria-label="Back to top"
         >
           <Mark />
-          <span className="font-display text-lg tracking-wider text-paper">
+          <span className="font-display text-lg tracking-wider">
             MEET JADHAV
           </span>
         </a>
 
-        <nav className="hidden items-center gap-6 lg:flex" aria-label="Primary">
+        <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary">
           {NAV.map((item) => (
             <a
               key={item.href}
               href={item.href}
-              data-sense="true"
               aria-current={active === item.href ? "true" : undefined}
               className={cn(
-                "relative font-mono text-[11px] tracking-[0.2em] uppercase transition-colors",
-                active === item.href ? "text-signal-red-bright" : "text-paper-dim hover:text-paper"
+                "relative text-[13px] tracking-wide transition-colors",
+                active === item.href
+                  ? "text-paper"
+                  : "text-paper-dim hover:text-paper"
               )}
             >
-              {active === item.href && (
-                <span
-                  className="absolute top-1/2 -left-3 h-1 w-1 -translate-y-1/2 animate-pulse-slow rounded-full bg-signal-red-bright"
-                  aria-hidden
-                />
-              )}
               {item.label}
               {active === item.href && (
                 <motion.span
@@ -108,15 +102,10 @@ export function Header() {
           <button
             type="button"
             onClick={toggle}
-            data-sense="true"
             aria-pressed={recruiterOpen}
-            className="hidden items-center gap-2 border border-signal-red/70 bg-signal-red/10 px-3.5 py-1.5 font-mono text-[11px] tracking-[0.2em] text-signal-red-bright uppercase transition-colors hover:bg-signal-red/20 sm:flex"
+            className="hidden border border-hairline px-3.5 py-1.5 text-[13px] tracking-wide text-paper transition-colors hover:border-signal-red-bright hover:text-signal-red-bright sm:block"
           >
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-signal-red-bright opacity-75" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-signal-red-bright" />
-            </span>
-            Recruiter Mode
+            Recruiter view
           </button>
 
           <button
@@ -141,18 +130,18 @@ export function Header() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             className="overflow-hidden border-b border-hairline bg-ink lg:hidden"
           >
-            <nav className="flex flex-col gap-4 px-5 py-4" aria-label="Mobile">
+            <nav className="flex flex-col gap-1 px-5 py-3" aria-label="Mobile">
               {NAV.map((item) => (
                 <a
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
                   className={cn(
-                    "font-mono text-xs tracking-[0.2em] uppercase",
-                    active === item.href ? "text-signal-red-bright" : "text-paper-dim"
+                    "py-2.5 text-base",
+                    active === item.href ? "text-paper" : "text-paper-dim"
                   )}
                 >
                   {item.label}
@@ -164,9 +153,9 @@ export function Header() {
                   toggle();
                   setMobileOpen(false);
                 }}
-                className="mt-1 flex items-center gap-2 border border-signal-red/70 bg-signal-red/10 px-3.5 py-2 font-mono text-xs tracking-[0.2em] text-signal-red-bright uppercase"
+                className="mt-1 border border-hairline px-3.5 py-2.5 text-left text-base text-paper"
               >
-                Recruiter Mode
+                Recruiter view
               </button>
             </nav>
           </motion.div>

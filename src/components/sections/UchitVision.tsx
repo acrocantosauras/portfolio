@@ -3,309 +3,364 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { useReducedMotionSafe } from "@/lib/reduced-motion";
-import { SectionHeading } from "@/components/ui/SectionHeading";
-import { DisplayTitle } from "@/components/ui/DisplayTitle";
+import { ChapterMark } from "@/components/ui/ChapterMark";
 import { Chip } from "@/components/ui/Chip";
-import { WebCorner } from "@/components/ui/WebCorner";
 import { experience } from "@/data/resume";
 
 const uchit = experience.find((e) => e.id === "uchit")!;
+const EASE = [0.16, 1, 0.3, 1] as const;
 
-type TrackedPerson = {
+type Walker = {
   id: string;
   conf: number;
-  // static "frame" positions in % — boxes drift subtly via animation
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  delay: number;
+  lane: number; // 0 = far, 1 = near the camera
+  speed: number; // fractions of the frame width per second
+  dir: 1 | -1;
+  phase: number; // where in the loop it starts, 0..1
 };
 
-const PEOPLE: TrackedPerson[] = [
-  { id: "07", conf: 0.96, x: 12, y: 30, w: 14, h: 44, delay: 0 },
-  { id: "08", conf: 0.92, x: 38, y: 22, w: 15, h: 50, delay: 0.4 },
-  { id: "09", conf: 0.89, x: 63, y: 34, w: 13, h: 42, delay: 0.9 },
-  { id: "10", conf: 0.94, x: 82, y: 26, w: 12, h: 46, delay: 1.3 },
+// Illustrative walkers: each one loops across the frame at its own pace.
+const WALKERS: Walker[] = [
+  { id: "07", conf: 0.96, lane: 0.55, speed: 0.055, dir: 1, phase: 0.1 },
+  { id: "08", conf: 0.92, lane: 0.2, speed: 0.038, dir: -1, phase: 0.62 },
+  { id: "09", conf: 0.89, lane: 0.8, speed: 0.07, dir: 1, phase: 0.38 },
+  { id: "10", conf: 0.94, lane: 0.4, speed: 0.046, dir: -1, phase: 0.9 },
+  { id: "11", conf: 0.91, lane: 0.68, speed: 0.06, dir: -1, phase: 0.22 },
 ];
 
-const PIPELINE = ["VIDEO", "DETECTION", "TRACKING", "COUNTING", "ANALYTICS"] as const;
+const LINE_X = 0.5; // the counting line, as a fraction of the frame width
+const SPAN = 1.3; // the loop runs a little beyond both edges so nobody pops in
+const PIPELINE = ["Video", "Detection", "Tracking", "Counting", "Analytics"] as const;
 
-const PIPELINE_DETAIL: Record<string, string> = {
-  VIDEO: "RTSP streams from CCTV feeds enter the pipeline",
-  DETECTION: "YOLO proposes person / head bounding boxes per frame",
-  TRACKING: "Boxes are associated across frames into persistent IDs",
-  COUNTING: "In/out logic derives live and peak person counts",
-  ANALYTICS: "Occupancy metrics surface on the analytics dashboard",
-};
+/** x of a walker at time t (seconds), as a fraction of the frame width. */
+function xAt(w: Walker, t: number) {
+  const s = (((w.phase + w.dir * w.speed * t) % 1) + 1) % 1;
+  return -0.15 + s * SPAN;
+}
 
 function useClock(frozen: boolean) {
-  // Keep the SSR/client clock identical so the OSD timestamp does not trigger
-  // a hydration mismatch. `null` renders a fixed placeholder on both server and
-  // client (toTimeString() is timezone-dependent, so even a fixed Date would
-  // differ between a UTC server and a local browser); ticking starts after hydration.
+  // `null` renders a fixed placeholder on server and client (toTimeString() is
+  // timezone-dependent); the real clock starts after hydration.
   const [now, setNow] = useState<Date | null>(null);
-  const started = useRef(false);
-
   useEffect(() => {
     if (frozen) return;
-    if (!started.current) {
-      started.current = true;
-      setNow(new Date());
-    }
+    const first = setTimeout(() => setNow(new Date()), 0);
     const t = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(t);
+    return () => {
+      clearTimeout(first);
+      clearInterval(t);
+    };
   }, [frozen]);
   return now;
 }
 
-export function UchitVision() {
-  // Hydration-safe flag: the sweep-line child and the box `initial`/`animate`
-  // props branch on this value, so it must not differ during hydration.
-  const reduceMotion = useReducedMotionSafe();
-  const count = PEOPLE.length;
-  const [activePipe, setActivePipe] = useState(0);
-  const clock = useClock(Boolean(reduceMotion));
+/**
+ * The simulated street. People walk across it at their own speeds, each one
+ * wrapped in a tracking box that follows; a counting line flashes and the in/out
+ * tally ticks as someone crosses it; a crosshair follows the cursor. It pauses
+ * when scrolled away, and reduced motion gets a still frame.
+ */
+function TrackingFrame({ reduceMotion }: { reduceMotion: boolean }) {
+  const frameRef = useRef<HTMLDivElement>(null);
+  const walkerRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const lineRef = useRef<HTMLDivElement>(null);
+  const hairH = useRef<HTMLDivElement>(null);
+  const hairV = useRef<HTMLDivElement>(null);
+  const coordRef = useRef<HTMLSpanElement>(null);
+  const [tally, setTally] = useState({ inn: 0, out: 0 });
+  const clock = useClock(reduceMotion);
   const stamp = clock ? clock.toTimeString().slice(0, 8) : "--:--:--";
 
   useEffect(() => {
-    if (reduceMotion) return;
-    const t = setInterval(() => {
-      setActivePipe((p) => (p + 1) % PIPELINE.length);
-    }, 1600);
-    return () => clearInterval(t);
+    const frame = frameRef.current;
+    if (!frame) return;
+    let W = 0;
+    let H = 0;
+    let raf = 0;
+    let visible = true;
+    let start = 0;
+    let flashUntil = 0;
+    const lastX = WALKERS.map((w) => xAt(w, 0));
+
+    function layout() {
+      if (!frame) return;
+      W = frame.offsetWidth;
+      H = frame.offsetHeight;
+      WALKERS.forEach((w, i) => {
+        const el = walkerRefs.current[i];
+        if (!el) return;
+        const h = H * (0.3 + 0.28 * w.lane);
+        el.style.height = `${h}px`;
+        el.style.width = `${h * 0.42}px`;
+      });
+    }
+
+    function place(t: number, now: number) {
+      WALKERS.forEach((w, i) => {
+        const el = walkerRefs.current[i];
+        if (!el) return;
+        const x = xAt(w, t);
+        const h = H * (0.3 + 0.28 * w.lane);
+        const ground = H * (0.5 + 0.36 * w.lane);
+        const bob = Math.sin(t * 7 + w.phase * 10) * h * 0.012;
+        el.style.transform = `translate3d(${x * W - h * 0.21}px, ${ground - h + bob}px, 0)`;
+        el.style.visibility = "visible";
+        // crossing the counting line?
+        if (!reduceMotion && (lastX[i] - LINE_X) * (x - LINE_X) < 0 && Math.abs(x - lastX[i]) < 0.2) {
+          flashUntil = now + 380;
+          setTally((c) => (w.dir === 1 ? { ...c, inn: c.inn + 1 } : { ...c, out: c.out + 1 }));
+        }
+        lastX[i] = x;
+      });
+      if (lineRef.current) {
+        lineRef.current.style.opacity = now < flashUntil ? "1" : "0.45";
+        lineRef.current.style.backgroundColor = now < flashUntil ? "var(--color-signal-red-bright)" : "var(--color-paper)";
+      }
+    }
+
+    function tick(now: number) {
+      if (!start) start = now;
+      place((now - start) / 1000, now);
+      raf = visible ? requestAnimationFrame(tick) : 0;
+    }
+
+    layout();
+    // reduced motion: one still frame, mid-loop, no tally changes
+    place(reduceMotion ? 4 : 0, 0);
+
+    const ro = new ResizeObserver(() => {
+      layout();
+      if (reduceMotion) place(4, 0);
+    });
+    ro.observe(frame);
+
+    let io: IntersectionObserver | undefined;
+    if (!reduceMotion) {
+      io = new IntersectionObserver(([entry]) => {
+        visible = entry.isIntersecting;
+        cancelAnimationFrame(raf);
+        if (visible) raf = requestAnimationFrame(tick);
+      });
+      io.observe(frame);
+    }
+
+    return () => {
+      ro.disconnect();
+      io?.disconnect();
+      cancelAnimationFrame(raf);
+    };
   }, [reduceMotion]);
 
+  function onMove(e: React.PointerEvent) {
+    if (reduceMotion || e.pointerType === "touch") return;
+    const r = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - r.left;
+    const y = e.clientY - r.top;
+    if (hairH.current) hairH.current.style.transform = `translateY(${y}px)`;
+    if (hairV.current) hairV.current.style.transform = `translateX(${x}px)`;
+    if (coordRef.current) {
+      coordRef.current.textContent = `${Math.round((x / r.width) * 1920)}, ${Math.round((y / r.height) * 1080)}`;
+    }
+    if (hairH.current) hairH.current.style.opacity = "1";
+    if (hairV.current) hairV.current.style.opacity = "1";
+  }
+  function onLeave() {
+    if (hairH.current) hairH.current.style.opacity = "0";
+    if (hairV.current) hairV.current.style.opacity = "0";
+    if (coordRef.current) coordRef.current.textContent = "";
+  }
+
   return (
-    <section id="experience" className="relative overflow-hidden bg-ink-soft py-24 sm:py-32">
-      <WebCorner
-        anchor="tr"
-        className="absolute -top-4 -right-4 h-[30vmin] w-[30vmin] text-emerald-400/[0.08]"
-        strokeWidth={0.7}
+    <div
+      ref={frameRef}
+      onPointerMove={onMove}
+      onPointerLeave={onLeave}
+      className="relative aspect-[16/11] overflow-hidden sm:aspect-[21/9]"
+    >
+      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,#0d1220_0%,#05070f_70%)]" />
+      {/* camera optics: scan lines, a vignette, and the viewfinder brackets */}
+      <div className="scanlines pointer-events-none absolute inset-0" aria-hidden />
+      <div
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(0,0,0,0.6)_100%)]"
+        aria-hidden
       />
-      <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <SectionHeading eyebrow="SYS.02 / Computer Vision" title="UCHIT VISION" />
-          <p className="font-mono text-[11px] tracking-[0.3em] text-paper-dim uppercase">
-            {uchit.domain} · {uchit.location}
-          </p>
-        </div>
+      {(["top-2 left-2 border-t border-l", "top-2 right-2 border-t border-r", "bottom-2 left-2 border-b border-l", "right-2 bottom-2 border-r border-b"] as const).map((c) => (
+        <span key={c} className={`pointer-events-none absolute h-4 w-4 border-paper/60 ${c}`} aria-hidden />
+      ))}
 
-        {/* brief experience record — deliberately secondary to the work */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="mt-8 border-l-2 border-emerald-400/70 bg-ink-panel/50 py-3 pl-5"
+      {/* the street: a kerb line, a lit window, the counting line */}
+      <div className="absolute inset-x-0 bottom-[10%] h-px bg-overcast" aria-hidden />
+      <span className="absolute top-[14%] left-[27%] h-3 w-2 bg-amber/70" aria-hidden />
+      <span className="absolute top-[18%] left-[71%] h-2 w-2 bg-amber/50" aria-hidden />
+      <div
+        ref={lineRef}
+        className="absolute top-0 bottom-0 w-px opacity-45 transition-[opacity,background-color] duration-200"
+        style={{ left: `${LINE_X * 100}%`, backgroundColor: "var(--color-paper)" }}
+        aria-hidden
+      />
+      <span
+        className="absolute top-2 -translate-x-1/2 font-mono text-[9px] tracking-wide text-paper/70"
+        style={{ left: `${LINE_X * 100}%` }}
+        aria-hidden
+      >
+        COUNT LINE
+      </span>
+
+      {/* the people being tracked */}
+      {WALKERS.map((w, i) => (
+        <div
+          key={w.id}
+          ref={(el) => {
+            walkerRefs.current[i] = el;
+          }}
+          className="absolute top-0 left-0 will-change-transform"
+          style={{ visibility: "hidden" }}
+          aria-hidden
         >
-          <p className="font-mono text-[10px] tracking-[0.25em] text-paper-dim uppercase">
-            {uchit.company} · {uchit.role} · {uchit.period}
-          </p>
-          <p className="mt-1 max-w-3xl text-sm leading-relaxed text-paper/85">{uchit.points[0]}</p>
-        </motion.div>
+          {/* the track left behind */}
+          <span
+            className={`absolute top-1/2 h-px w-[160%] ${
+              w.dir === 1
+                ? "right-full bg-gradient-to-l from-signal-red-bright/70 to-transparent"
+                : "left-full bg-gradient-to-r from-signal-red-bright/70 to-transparent"
+            }`}
+          />
+          <div className="absolute inset-0 border border-paper/85">
+            <span className="absolute -top-5 left-0 flex whitespace-nowrap bg-signal-red px-1.5 py-0.5 font-mono text-[9px] font-bold tracking-wide text-paper">
+              PERSON {w.id}
+              <span className="ml-1.5 font-normal opacity-80">{w.conf.toFixed(2)}</span>
+            </span>
+            <span className="absolute top-[8%] left-1/2 h-[16%] w-[40%] -translate-x-1/2 border border-paper/45" />
+          </div>
+        </div>
+      ))}
 
-        <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-[1.15fr_0.85fr]">
-          {/* ---- simulated feed ---- */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.6 }}
-            className="relative border-2 border-hairline bg-black"
-            data-sense="true"
-          >
-            {/* camera OSD header */}
-            <div className="flex items-center justify-between border-b border-hairline bg-ink-panel px-4 py-2.5">
-              <div className="flex items-center gap-2 font-mono text-[10px] tracking-[0.25em] uppercase">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-signal-red-bright opacity-75" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-signal-red-bright" />
-                </span>
-                <span className="text-paper">CAM.04</span>
-                <span className="text-paper-dim">— RTSP // 25 FPS</span>
-              </div>
-              <span className="font-mono text-[10px] tracking-[0.2em] text-gold uppercase">
-                simulated feed
+      {/* the cursor's crosshair, with frame coordinates */}
+      <div
+        ref={hairH}
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-paper/25 opacity-0 transition-opacity duration-150"
+        aria-hidden
+      />
+      <div
+        ref={hairV}
+        className="pointer-events-none absolute inset-y-0 left-0 w-px bg-paper/25 opacity-0 transition-opacity duration-150"
+        aria-hidden
+      />
+
+      {/* on-screen display */}
+      <div className="absolute top-3 left-4 flex items-center gap-2 font-mono text-[10px] tracking-wide text-paper/90">
+        <span className="h-1.5 w-1.5 rounded-full bg-signal-red-bright" aria-hidden />
+        CAM 04
+      </div>
+      <div className="absolute top-3 right-4 font-mono text-[10px] tracking-wide text-paper/70">
+        {stamp}
+      </div>
+      <div className="absolute bottom-3 left-4 font-mono text-[10px] tracking-wide text-paper/80">
+        IN {String(tally.inn).padStart(2, "0")} · OUT {String(tally.out).padStart(2, "0")}
+      </div>
+      <span
+        ref={coordRef}
+        className="absolute right-4 bottom-3 font-mono text-[10px] tracking-wide text-paper/60"
+        aria-hidden
+      />
+    </div>
+  );
+}
+
+/**
+ * UchitVision — "The lens". The factual record is one line of work: a trainee at
+ * Uchit Technology supporting model-training and reinforcement-learning
+ * workflows for video analytics. The frame is a labeled illustration of the
+ * domain (what a tracking overlay does), never presented as footage or output
+ * from that work.
+ */
+export function UchitVision() {
+  const reduceMotion = useReducedMotionSafe();
+
+  return (
+    <section id="experience" className="surface-night-soft relative overflow-hidden py-28 sm:py-40">
+      <ChapterMark n="02" className="-top-[0.12em] -right-[0.1em] text-web-blue-bright/[0.13]" />
+      <div className="relative mx-auto max-w-7xl px-8 sm:px-12">
+        {/* the title: its own face, cropped like a film title, framed like a camera view */}
+        <div className="relative pt-6 pb-4 sm:pt-8">
+          {/* corner brackets */}
+          {(["top-0 left-0 border-t-2 border-l-2", "top-0 right-0 border-t-2 border-r-2", "bottom-0 left-0 border-b-2 border-l-2", "right-0 bottom-0 border-r-2 border-b-2"] as const).map((c) => (
+            <span key={c} className={`absolute h-5 w-5 border-signal-red-bright sm:h-7 sm:w-7 ${c}`} aria-hidden />
+          ))}
+          <div className="flex flex-col gap-6 px-5 sm:px-8 lg:flex-row lg:items-end lg:justify-between">
+            <h2 className="font-vision leading-[0.8] font-black tracking-tight text-paper uppercase" aria-label="Video analytics">
+              <span aria-hidden className="stroke-text block text-paper/90 [font-size:clamp(4.2rem,17vw,14rem)]">
+                VIDEO
               </span>
-            </div>
-
-            {/* frame */}
-            <div className="relative aspect-[16/10] overflow-hidden sm:aspect-[16/9]">
-              {/* dark street scene with faint structure */}
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_100%,#141821_0%,#050507_70%)]" />
-              <div
-                className="absolute inset-0 opacity-[0.07]"
-                style={{
-                  backgroundImage:
-                    "repeating-linear-gradient(0deg, var(--color-paper) 0, var(--color-paper) 1px, transparent 1px, transparent 44px), repeating-linear-gradient(90deg, var(--color-paper) 0, var(--color-paper) 1px, transparent 1px, transparent 44px)",
-                }}
-                aria-hidden
-              />
-              {/* scanlines, used sparingly */}
-              <div
-                className="pointer-events-none absolute inset-0 opacity-10"
-                style={{
-                  backgroundImage:
-                    "repeating-linear-gradient(0deg, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.12) 1px, transparent 1px, transparent 3px)",
-                }}
-                aria-hidden
-              />
-              {/* sweep line */}
-              {!reduceMotion && (
-                <motion.div
-                  className="pointer-events-none absolute inset-x-0 h-10 bg-gradient-to-b from-transparent via-emerald-400/10 to-transparent"
-                  animate={{ top: ["-10%", "110%"] }}
-                  transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-                  aria-hidden
-                />
-              )}
-
-              {/* tracked boxes + trails */}
-              {PEOPLE.map((p, i) => (
-                <motion.div
-                  key={p.id}
-                  className="absolute inset-0"
-                  initial={reduceMotion ? false : { opacity: 0, scale: 1.12 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true, margin: "-40px" }}
-                  transition={{ duration: 0.55, delay: 0.25 + i * 0.12, ease: "easeOut" }}
-                >
-                  {/* heading trail */}
-                  <span
-                    className="pointer-events-none absolute border-t border-dashed border-emerald-400/30"
-                    style={{
-                      left: `${p.x + p.w / 2}%`,
-                      top: `${p.y - 8}%`,
-                      width: "9%",
-                    }}
-                    aria-hidden
-                  />
-                  <motion.div
-                    className="absolute border border-emerald-400/90"
-                    style={{ left: `${p.x}%`, top: `${p.y}%`, width: `${p.w}%`, height: `${p.h}%` }}
-                    animate={reduceMotion ? undefined : { x: [0, 6, -4, 0], y: [0, -3, 3, 0] }}
-                    transition={{ duration: 6 + p.delay, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <span className="absolute -top-5 left-0 flex whitespace-nowrap bg-emerald-400/90 px-1.5 py-0.5 font-mono text-[9px] font-bold tracking-[0.15em] text-black">
-                      PERSON ID:{p.id}
-                      <span className="ml-1.5 opacity-70">{p.conf.toFixed(2)}</span>
-                    </span>
-                    {/* head indicator */}
-                    <span className="absolute top-[8%] left-1/2 h-[18%] w-[26%] -translate-x-1/2 border border-emerald-400/50" aria-hidden />
-                  </motion.div>
-                </motion.div>
-              ))}
-
-              {/* center crosshair */}
-              <div
-                className="pointer-events-none absolute top-1/2 left-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 opacity-40"
-                aria-hidden
-              >
-                <span className="absolute top-1/2 left-0 h-px w-full bg-emerald-400" />
-                <span className="absolute top-0 left-1/2 h-full w-px bg-emerald-400" />
-              </div>
-
-              {/* corner ticks */}
-              <div className="pointer-events-none absolute inset-3" aria-hidden>
-                <span className="absolute top-0 left-0 h-4 w-4 border-t-2 border-l-2 border-emerald-400/60" />
-                <span className="absolute top-0 right-0 h-4 w-4 border-t-2 border-r-2 border-emerald-400/60" />
-                <span className="absolute bottom-0 left-0 h-4 w-4 border-b-2 border-l-2 border-emerald-400/60" />
-                <span className="absolute right-0 bottom-0 h-4 w-4 border-r-2 border-b-2 border-emerald-400/60" />
-              </div>
-
-              {/* OSD footer */}
-              <div className="absolute bottom-2 left-3 flex items-center gap-3 font-mono text-[9px] tracking-[0.2em] text-emerald-400/80">
-                <span>SIMULATED FEED — ANALYTICS DEMO</span>
-                <span className="text-amber/80">
-                  {stamp === "00:00:00"
-                    ? "clock initializing"
-                    : stamp}
-                </span>
-              </div>
-              <div className="absolute right-3 bottom-2 flex items-end gap-[3px]" aria-hidden>
-                {[3, 5, 7, 9].map((h) => (
-                  <span key={h} className="w-[3px] bg-emerald-400/70" style={{ height: h }} />
-                ))}
-              </div>
-            </div>
-
-            {/* telemetry bar */}
-            <div className="grid grid-cols-3 divide-x divide-hairline border-t border-hairline bg-ink-panel">
-              {[
-                { label: "PEOPLE IN FRAME", value: String(count).padStart(2, "0"), accent: "text-emerald-400" },
-                { label: "PEAK (SAMPLE)", value: "13", accent: "text-paper" },
-                { label: "PIPELINE", value: "TRACKING", accent: "text-signal-red-bright" },
-              ].map((s) => (
-                <div key={s.label} className="px-4 py-3 text-center">
-                  <p className="font-mono text-[9px] tracking-[0.25em] text-paper-dim uppercase">{s.label}</p>
-                  <p className={`mt-1 font-display text-2xl tracking-wide sm:text-3xl ${s.accent}`}>{s.value}</p>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* ---- description ---- */}
-          <div className="flex flex-col justify-center gap-5">
-            <div>
-              <DisplayTitle
-                as="p"
-                text="Cameras in, decisions out."
-                className="text-2xl sm:text-3xl"
-              />
-              <p className="mt-3 text-sm leading-relaxed text-paper-dim sm:text-base">
-                Real-time video analytics pipelines: CCTV in, structured understanding out —
-                detection, tracking, counting, and occupancy reporting that stays readable to the
-                people watching the dashboard.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {["YOLO", "OpenCV", "Object Tracking", "RTSP", "Person Counting", "Edge AI"].map((t) => (
-                <Chip key={t}>{t}</Chip>
-              ))}
-            </div>
+              <span aria-hidden className="relative -mt-[0.04em] block [font-size:clamp(4.2rem,17vw,14rem)]">
+                ANALYTICS
+                <span className="scanlines pointer-events-none absolute inset-0" />
+              </span>
+            </h2>
+            {/* marginal annotations: what a camera view prints at its edge */}
+            <dl className="mb-2 grid shrink-0 grid-cols-[auto_1fr] gap-x-4 gap-y-1 font-mono text-[11px] tracking-wide text-paper-dim">
+              <dt className="text-signal-red-bright">REC</dt>
+              <dd className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-signal-red-bright" aria-hidden /> SIMULATED FEED
+              </dd>
+              <dt>VIEW</dt>
+              <dd>CAM 04 · 1920×1080 · 25 FPS</dd>
+              <dt>MODE</dt>
+              <dd>DETECT / TRACK / COUNT</dd>
+              <dt>ROLE</dt>
+              <dd>MODEL-TRAINING SUPPORT</dd>
+            </dl>
           </div>
         </div>
 
-        {/* ---- pipeline ---- */}
-        <div className="mt-14 border border-hairline bg-ink-panel/40 p-5 sm:p-8">
-          <div className="mb-6 flex items-center justify-between font-mono text-[10px] tracking-[0.3em] text-paper-dim uppercase">
-            <span>cv.pipeline</span>
-            <span className="hidden sm:inline">stage {String(activePipe + 1).padStart(2, "0")}/05</span>
+        <motion.figure
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.8, ease: EASE }}
+          className="mt-12 border border-hairline bg-black"
+        >
+          <TrackingFrame reduceMotion={Boolean(reduceMotion)} />
+          <figcaption className="border-t border-hairline px-4 py-2.5 text-xs text-paper-dim">
+            An animated illustration of people tracking and counting, drawn for this page. Not
+            footage or output from the work below. Move your cursor over it.
+          </figcaption>
+        </motion.figure>
+
+        <div className="mt-16 grid grid-cols-1 gap-x-16 gap-y-12 lg:grid-cols-12">
+          <div className="lg:col-span-7">
+            <p className="font-serif text-3xl leading-snug text-paper sm:text-4xl">
+              {uchit.role}, {uchit.company}.
+            </p>
+            <p className="mt-2 text-sm text-paper-dim">
+              {uchit.period} · {uchit.location}
+            </p>
+            <p className="mt-6 max-w-xl text-lg leading-relaxed text-paper/90">
+              {uchit.points[0]}
+            </p>
+            <div className="mt-6 flex flex-wrap gap-2">
+              {["AI model training", "Reinforcement learning", "Video analytics", "Uchit AI Box"].map(
+                (t) => (
+                  <Chip key={t}>{t}</Chip>
+                )
+              )}
+            </div>
           </div>
-          <ol className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-0">
-            {PIPELINE.map((stage, i) => {
-              const active = i === activePipe || reduceMotion;
-              return (
-                <li key={stage} className="flex flex-col gap-1 sm:flex-1 sm:flex-row sm:items-center">
-                  <div
-                    className={`relative border px-4 py-3 text-center font-mono text-[11px] font-bold tracking-[0.2em] transition-colors duration-300 sm:flex-1 ${
-                      active
-                        ? "border-emerald-400 bg-emerald-400/10 text-emerald-400"
-                        : "border-hairline text-paper-dim"
-                    }`}
-                  >
-                    {stage}
-                    {active && !reduceMotion && (
-                      <span
-                        className="absolute top-1.5 right-1.5 h-1 w-1 rounded-full bg-emerald-400"
-                        aria-hidden
-                      />
-                    )}
-                  </div>
-                  {i < PIPELINE.length - 1 && (
-                    <span className={`mx-2 hidden h-px w-6 sm:block ${i < activePipe ? "bg-emerald-400" : "bg-hairline"}`} aria-hidden />
-                  )}
+
+          <div className="lg:col-span-5">
+            <p className="text-sm text-paper-dim">How a video-analytics pipeline is usually laid out</p>
+            <ol className="mt-4 border-t border-hairline">
+              {PIPELINE.map((stage, i) => (
+                <li
+                  key={stage}
+                  className="flex items-baseline justify-between border-b border-hairline py-3 text-paper"
+                >
+                  <span className="text-lg">{stage}</span>
+                  <span className="font-mono text-xs text-paper-dim">{i + 1}/5</span>
                 </li>
-              );
-            })}
-          </ol>
-          <p className="mt-4 font-mono text-[11px] text-paper-dim" role="status" aria-live="polite">
-            <span className="text-emerald-400">›</span> {PIPELINE_DETAIL[PIPELINE[activePipe]]}
-          </p>
-          <p className="mt-1 font-mono text-[10px] text-paper-dim/60">
-            * simulated telemetry — representative of the type of pipeline worked on, not a live camera feed.
-          </p>
+              ))}
+            </ol>
+          </div>
         </div>
       </div>
     </section>

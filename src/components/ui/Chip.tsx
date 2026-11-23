@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 
+/** Small plain-text tag. Sans, not mono — mono is reserved for real data. */
 export function Chip({
   children,
   tone = "default",
@@ -12,13 +13,10 @@ export function Chip({
   return (
     <span
       className={cn(
-        "inline-flex items-center border font-mono text-[11px] tracking-wide uppercase px-2.5 py-1",
-        tone === "default" &&
-          "border-hairline bg-ink-soft/60 text-paper-dim",
-        tone === "red" &&
-          "border-signal-red/60 bg-signal-red/10 text-signal-red-bright",
-        tone === "blue" &&
-          "border-web-blue/60 bg-web-blue/10 text-web-blue-bright",
+        "inline-flex items-center border px-2.5 py-1 text-xs leading-none tracking-wide",
+        tone === "default" && "border-hairline text-paper-dim",
+        tone === "red" && "border-signal-red/60 text-signal-red-bright",
+        tone === "blue" && "border-web-blue text-web-blue-bright",
         className
       )}
     >
