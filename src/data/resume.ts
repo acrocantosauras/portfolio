@@ -549,11 +549,4 @@ export const education: EducationItem[] = [
     location: "Pune, Maharashtra",
     period: "Aug 2021 – May 2025",
   },
-  {
-    id: "edu-highschool",
-    title: "Higher Secondary (Science) — 86.66%",
-    org: "MGSK Gujarati High School",
-    location: "Sangli, Maharashtra",
-    period: "2021",
-  },
 ];

@@ -329,10 +329,15 @@ export function UchitVision() {
 
         <div className="mt-16 grid grid-cols-1 gap-x-16 gap-y-12 lg:grid-cols-12">
           <div className="lg:col-span-7">
-            <p className="font-serif text-3xl leading-snug text-paper sm:text-4xl">
-              {uchit.role}, {uchit.company}.
+            <p className="font-vision leading-[0.9] font-black tracking-tight uppercase">
+              <span className="block text-signal-red-bright [font-size:clamp(2.4rem,6vw,4.4rem)]">
+                {uchit.role}
+              </span>
+              <span className="stroke-text mt-1 block text-paper/90 [font-size:clamp(1.9rem,4.6vw,3.4rem)]">
+                {uchit.company}
+              </span>
             </p>
-            <p className="mt-2 text-sm text-paper-dim">
+            <p className="mt-4 font-mono text-[11px] tracking-[0.2em] text-paper-dim uppercase">
               {uchit.period} · {uchit.location}
             </p>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-paper/90">

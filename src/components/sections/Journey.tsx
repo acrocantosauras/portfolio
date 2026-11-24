@@ -10,7 +10,6 @@ import { cn } from "@/lib/utils";
 
 const uchit = experience.find((e) => e.id === "uchit")!;
 const degree = education.find((e) => e.id === "edu-degree")!;
-const school = education.find((e) => e.id === "edu-highschool")!;
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 type Entry = {
@@ -49,12 +48,6 @@ const ENTRIES: Entry[] = [
     period: degree.period,
     title: degree.title,
     org: `${degree.org} · ${degree.location}`,
-  },
-  {
-    id: "school",
-    period: school.period,
-    title: school.title,
-    org: `${school.org} · ${school.location}`,
   },
 ];
 
