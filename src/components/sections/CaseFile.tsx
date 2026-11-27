@@ -3,6 +3,7 @@
 import { motion } from "motion/react";
 import { Download } from "lucide-react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { Sighting } from "@/components/ui/Sighting";
 import { ChapterMark } from "@/components/ui/ChapterMark";
 import { profile, projects, skillGroups } from "@/data/resume";
 
@@ -111,7 +112,12 @@ export function CaseFile() {
                   <span className="h-2 w-px bg-current" />
                 </div>
 
-                <div className="relative border border-dawn-ink/40 bg-dawn-warm p-2 shadow-[0_28px_48px_-28px_rgba(20,22,27,0.5)]">
+                {/* a sighting: he looks over the top of the document */}
+                <div className="relative h-0">
+                  <Sighting id="resume" kind="peek" className="-top-[62px] right-[38%] sm:right-[23%] h-[96px] w-[84px]" />
+                </div>
+
+                <div className="relative z-10 border border-dawn-ink/40 bg-dawn-warm p-2 shadow-[0_28px_48px_-28px_rgba(20,22,27,0.5)]" data-sense="The PDF is served without the frame-blocking header, so it can preview here.">
                   <object
                     data={`${profile.resumeUrl}#toolbar=0`}
                     type="application/pdf"

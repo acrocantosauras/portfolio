@@ -203,7 +203,7 @@ export function AegisSimulator() {
   const running = run && run.phase !== "idle" && run.phase !== "done";
 
   return (
-    <div ref={rootRef} className="mt-16 border border-hairline bg-ink-soft">
+    <div ref={rootRef} data-sense="A deterministic engine written in TypeScript. It runs in your browser and calls no backend." className="mt-16 border border-hairline bg-ink-soft">
       {/* the honesty banner: always visible */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-gold/40 bg-gold/[0.07] px-4 py-3 sm:px-6">
         <span className="border border-gold px-2 py-0.5 font-mono text-[11px] font-bold tracking-[0.18em] text-gold">

@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { AnimatePresence, motion, useMotionValue, useSpring } from "motion/react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { Sighting } from "@/components/ui/Sighting";
 import { ChapterMark } from "@/components/ui/ChapterMark";
 import { Chip } from "@/components/ui/Chip";
 import { WebCorner } from "@/components/ui/WebCorner";
@@ -89,6 +90,12 @@ export function Missions() {
         anchor="br"
         className="absolute -right-4 -bottom-4 h-[40vmin] w-[40vmin] text-signal-red-bright/[0.12]"
         strokeWidth={1}
+      />
+      {/* a sighting: he drops in above the project cards */}
+      <Sighting
+        id="projects"
+        kind="hang"
+        className="top-0 right-3 z-20 h-[168px] w-20 overflow-hidden sm:right-[24%] sm:h-[400px]"
       />
       <div className="relative mx-auto max-w-7xl px-6 sm:px-12">
         <SectionHeading title="ALL PROJECTS" />

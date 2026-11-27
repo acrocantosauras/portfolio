@@ -1,12 +1,18 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { ChapterMark } from "@/components/ui/ChapterMark";
 import { Mark } from "@/components/ui/Mark";
+import { ForgetTiles } from "@/components/sections/ForgetTiles";
 import PixelTransition from "@/components/ui/PixelTransition";
 import { profile } from "@/data/resume";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
+
+const FORGET_MS = 5200;
+// the secret handshake: tap the tape strips in this order
+const HANDSHAKE = ["left", "right", "left", "right"] as const;
 
 const FACTS = [
   { label: "Based in", value: profile.location },
@@ -22,6 +28,31 @@ const FACTS = [
  */
 export function Identity() {
   const [lead, ...rest] = profile.identity;
+  const [forgotten, setForgotten] = useState(false);
+  const [shook, setShook] = useState(false);
+  const taps = useRef<string[]>([]);
+
+  // nothing stays forgotten: it all comes back on its own
+  useEffect(() => {
+    if (!forgotten) return;
+    const id = window.setTimeout(() => setForgotten(false), FORGET_MS);
+    return () => window.clearTimeout(id);
+  }, [forgotten]);
+
+  useEffect(() => {
+    if (!shook) return;
+    const id = window.setTimeout(() => setShook(false), 4200);
+    return () => window.clearTimeout(id);
+  }, [shook]);
+
+  function tapTape(side: (typeof HANDSHAKE)[number]) {
+    taps.current = [...taps.current, side].slice(-HANDSHAKE.length);
+    if (HANDSHAKE.every((s, i) => taps.current[i] === s)) {
+      taps.current = [];
+      setForgotten(false);
+      setShook(true);
+    }
+  }
 
   return (
     <section id="identity" className="surface-predawn relative overflow-hidden py-28 sm:py-40">
@@ -51,7 +82,9 @@ export function Identity() {
             transition={{ duration: 0.9, ease: EASE }}
             className="relative z-10 max-w-sm sm:max-w-md lg:col-span-5 lg:col-start-1 lg:row-start-1 lg:max-w-none lg:self-start"
           >
-            <div className="relative aspect-[4/5] overflow-hidden border-2 border-paper bg-black shadow-[12px_12px_0_0_var(--color-signal-red)]">
+            <div
+              data-sense="The pixel mask is a React Bits component, adapted for this page. It adds no packages."
+              className="relative aspect-[4/5] overflow-hidden border-2 border-paper bg-black shadow-[12px_12px_0_0_var(--color-signal-red)]">
               <PixelTransition
                 className="!absolute inset-0 h-full"
                 aspectRatio="4 / 5"
@@ -87,13 +120,57 @@ export function Identity() {
                 }
               />
               <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] p-5">
-                <span className="font-display text-3xl tracking-wide text-paper">{profile.name}</span>
+                <span className="font-display text-3xl tracking-wide text-paper">
+                  <span className="sr-only">{profile.name}</span>
+                  {profile.name.split("").map((ch, i) => (
+                    <span
+                      key={i}
+                      aria-hidden
+                      className="forget-letter whitespace-pre"
+                      style={{ opacity: forgotten ? 0 : 1, transitionDelay: `${((i * 7) % 11) * 70}ms` }}
+                    >
+                      {ch}
+                    </span>
+                  ))}
+                </span>
                 <span className="mt-1 block text-sm text-paper-dim">{profile.location}</span>
               </figcaption>
+              <ForgetTiles active={forgotten} />
+              {(forgotten || shook) && (
+                <p
+                  aria-hidden
+                  className="forget-line pointer-events-none absolute inset-x-4 top-1/2 lg:right-[34%] z-[4] -translate-y-1/2 text-center font-serif text-3xl leading-snug text-paper italic"
+                >
+                  {shook ? "You remembered the handshake." : "Nobody here remembers that name."}
+                </p>
+              )}
             </div>
             {/* strips of tape holding it to the page */}
-            <span aria-hidden className="absolute -top-3 -left-5 h-6 w-20 -rotate-[28deg] bg-gold/85" />
-            <span aria-hidden className="absolute -top-3 -right-5 h-6 w-20 rotate-[24deg] bg-gold/85" />
+            <button
+              type="button"
+              onClick={() => tapTape("left")}
+              aria-label="Strip of tape, left corner"
+              className="absolute -top-3 -left-5 z-[5] h-6 w-20 -rotate-[28deg] bg-gold/85 transition-[filter] hover:brightness-110"
+            />
+            <button
+              type="button"
+              onClick={() => tapTape("right")}
+              aria-label="Strip of tape, right corner"
+              className="absolute -top-3 -right-5 z-[5] h-6 w-20 rotate-[24deg] bg-gold/85 transition-[filter] hover:brightness-110"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                setShook(false);
+                setForgotten((v) => !v);
+              }}
+              className="mt-7 border border-paper/50 px-4 py-2.5 text-sm text-paper transition-colors hover:border-signal-red-bright hover:text-signal-red-bright"
+            >
+              {forgotten ? "Remind them" : "What if everyone forgot?"}
+            </button>
+            <p role="status" className="sr-only">
+              {shook ? "You remembered the handshake." : forgotten ? "Nobody here remembers that name." : ""}
+            </p>
           </motion.figure>
 
           {/* the text panel overlaps the photo's right edge */}

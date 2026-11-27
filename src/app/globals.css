@@ -402,3 +402,77 @@ html.is-frozen *:not(.freeze-veil, .freeze-veil *) {
     opacity: 0;
   }
 }
+
+/* ---- the forgotten moment (About) ---- */
+.forget-tile {
+  transition: opacity 0.25s linear;
+}
+.forget-letter {
+  transition: opacity 0.35s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .forget-tile,
+  .forget-letter {
+    transition-delay: 0ms !important;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .forget-line {
+    animation: freeze-in 0.4s ease-out 0.9s both;
+  }
+  /* heightened senses */
+  .senses {
+    animation: freeze-in 0.22s ease-out both;
+  }
+}
+
+/* ---- the little web-slinger ---- */
+@media (prefers-reduced-motion: no-preference) {
+  .slinger-breathe {
+    transform-origin: 50% 100%;
+    transform-box: fill-box;
+    animation: slinger-breathe 3.4s ease-in-out infinite;
+  }
+  .slinger-wave {
+    transform-origin: 9px -56px;
+    animation: slinger-wave 0.6s ease-in-out 4;
+  }
+}
+@keyframes slinger-breathe {
+  50% {
+    transform: scaleY(1.025);
+  }
+}
+@keyframes slinger-wave {
+  50% {
+    transform: rotate(16deg);
+  }
+}
+
+/* running stride: legs and arms swing in opposite phase; the body leans in */
+.slinger-leg-a,
+.slinger-leg-b {
+  transform-origin: 0 -33px;
+}
+.slinger-arm-a,
+.slinger-arm-b {
+  transform-origin: 0 -55px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .slinger-leg-a,
+  .slinger-arm-b {
+    animation: slinger-swing 0.34s ease-in-out infinite alternate;
+  }
+  .slinger-leg-b,
+  .slinger-arm-a {
+    animation: slinger-swing 0.34s ease-in-out infinite alternate-reverse;
+  }
+}
+@keyframes slinger-swing {
+  from {
+    transform: rotate(-30deg);
+  }
+  to {
+    transform: rotate(30deg);
+  }
+}

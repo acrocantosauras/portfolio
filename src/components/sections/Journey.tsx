@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { motion } from "motion/react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { Sighting } from "@/components/ui/Sighting";
 import { ChapterMark } from "@/components/ui/ChapterMark";
 import { certifications, education, experience } from "@/data/resume";
 import { cn } from "@/lib/utils";
@@ -105,9 +106,14 @@ export function Journey() {
           </div>
         </div>
 
+        {/* a sighting: he sprints along behind the timeline cards */}
+        <div className="relative h-0">
+          <Sighting id="journey" kind="run" className="inset-x-0 -top-5 h-[96px] overflow-hidden" />
+        </div>
+
         <div
           ref={rail}
-          tabIndex={0}
+ data-sense="A real scroll region: swipe it, or focus it and use the arrow keys."          tabIndex={0}
           role="region"
           aria-label="Timeline of education and experience. Scroll sideways."
           onScroll={(e) => {
@@ -115,7 +121,7 @@ export function Journey() {
             const max = el.scrollWidth - el.clientWidth;
             setProgress(max > 0 ? el.scrollLeft / max : 0);
           }}
-          className="mt-12 flex snap-x snap-proximity gap-6 overflow-x-auto px-6 pb-6 [scrollbar-width:none] sm:px-12 [&::-webkit-scrollbar]:hidden"
+          className="relative z-10 mt-12 flex snap-x snap-proximity gap-6 overflow-x-auto px-6 pb-6 [scrollbar-width:none] sm:px-12 [&::-webkit-scrollbar]:hidden"
         >
           {ENTRIES.map((item, i) => {
             const f = FRAMES[i % FRAMES.length];

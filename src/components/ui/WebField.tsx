@@ -1,22 +1,19 @@
 "use client";
 
 import { useEffect, useRef, type RefObject } from "react";
+import { drawOrganicStrand, STRAND_LIFE, type OrganicStrand } from "@/lib/organic-web";
 
 type Node = { rx: number; ry: number; x: number; y: number; vx: number; vy: number };
-type Strand = { fx: number; fy: number; tx: number; ty: number; born: number };
 
 const RADIALS = [98, 112, 126, 141, 156, 172]; // degrees; pointing down-left from the corner
 const RINGS = [0.14, 0.27, 0.42, 0.59, 0.78, 1];
 const PULL_RADIUS = 170;
-const STRAND_GROW = 190; // ms for a fired strand to reach its target
-const STRAND_HOLD = 2200; // ms it stays before fading
-const STRAND_FADE = 900;
 
 /**
  * An interactive spiderweb for the hero. It is anchored to the top-right corner
  * and hangs into the frame. Near the cursor the strands are tugged toward it
- * and spring back; clicking anywhere in the hero fires a strand from the nearest
- * top corner that sticks where you aimed and fades.
+ * and spring back; clicking anywhere in the hero fires an organic strand from the
+ * nearest lower corner that sticks where you aimed, sags and fades.
  *
  * It runs only while there is something to animate (pointer nearby, strands in
  * flight, nodes still settling), only while the hero is on screen, and renders a
@@ -38,7 +35,7 @@ export function WebField({ targetRef }: { targetRef: RefObject<HTMLElement | nul
     let dpr = 1;
     let nodes: Node[][] = [];
     let anchor = { x: 0, y: 0 };
-    const strands: Strand[] = [];
+    const strands: OrganicStrand[] = [];
     const pointer = { x: -9999, y: -9999, active: false };
     let raf = 0;
     let running = false;
@@ -122,32 +119,9 @@ export function WebField({ targetRef }: { targetRef: RefObject<HTMLElement | nul
 
     function drawStrands(now: number) {
       if (!ctx) return;
-      for (let s = strands.length - 1; s >= 0; s--) {
-        const st = strands[s];
-        const age = now - st.born;
-        if (age > STRAND_GROW + STRAND_HOLD + STRAND_FADE) {
-          strands.splice(s, 1);
-          continue;
-        }
-        const grow = Math.min(1, age / STRAND_GROW);
-        const eased = 1 - Math.pow(1 - grow, 3);
-        const fade = age < STRAND_GROW + STRAND_HOLD ? 1 : 1 - (age - STRAND_GROW - STRAND_HOLD) / STRAND_FADE;
-        const x = st.fx + (st.tx - st.fx) * eased;
-        const y = st.fy + (st.ty - st.fy) * eased;
-        // a strand sags a little under its own weight once it has landed
-        const sag = 14 * eased;
-        ctx.strokeStyle = `rgba(236, 230, 216, ${0.9 * fade})`;
-        ctx.lineWidth = 1.6;
-        ctx.beginPath();
-        ctx.moveTo(st.fx, st.fy);
-        ctx.quadraticCurveTo((st.fx + x) / 2, (st.fy + y) / 2 + sag, x, y);
-        ctx.stroke();
-        if (grow >= 1) {
-          ctx.fillStyle = `rgba(255, 84, 69, ${fade})`;
-          ctx.beginPath();
-          ctx.arc(st.tx, st.ty, 3.2, 0, Math.PI * 2);
-          ctx.fill();
-        }
+      for (let i = strands.length - 1; i >= 0; i--) {
+        if (now - strands[i].born > STRAND_LIFE) strands.splice(i, 1);
+        else drawOrganicStrand(ctx, strands[i], now);
       }
     }
 
@@ -195,12 +169,14 @@ export function WebField({ targetRef }: { targetRef: RefObject<HTMLElement | nul
       const p = local(e);
       const fromLeft = p.x < W / 2;
       if (strands.length >= 6) strands.shift();
+      // fired from the lower corners, as if from a raised wrist
       strands.push({
-        fx: fromLeft ? -6 : W + 6,
-        fy: -6,
+        fx: fromLeft ? -8 : W + 8,
+        fy: H * 0.92,
         tx: p.x,
         ty: p.y,
         born: performance.now(),
+        seed: Math.round(p.x * 7 + p.y * 13) % 997,
       });
       kick();
     }

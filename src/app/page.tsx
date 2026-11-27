@@ -19,7 +19,8 @@ import { SCENES } from "@/lib/rooftop";
  * run across rooftops: a layered scene sits between every pair of chapters, and
  * the roof you land on is the floor of the next chapter. The sky, the skyline's
  * colours and the number of lit windows move from deep night to morning across
- * the nine scenes, and a single web strand ties them together.
+ * the eight scenes, and a single web strand ties them together. The last chapter,
+ * Say Hi, runs straight into the morning ending.
  *
  * Navigation links jump straight to the chapter ids, so nobody has to scroll
  * through the scenes.
@@ -47,7 +48,6 @@ export default function Home() {
           <CaseFile />
           <RooftopScene spec={SCENES[7]} />
           <Contact />
-          <RooftopScene spec={SCENES[8]} />
         </main>
       </WebThread>
       <FinalScene />

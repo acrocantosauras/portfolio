@@ -8,6 +8,8 @@ import { Header } from "./Header";
 import { RecruiterDrawer } from "./RecruiterDrawer";
 import { Cursor } from "./Cursor";
 import { SpiderSense } from "./SpiderSense";
+import { Thwip } from "./Thwip";
+import { HeightenedSenses } from "./HeightenedSenses";
 
 export function Chrome({ children }: { children: ReactNode }) {
   return (
@@ -20,9 +22,11 @@ export function Chrome({ children }: { children: ReactNode }) {
         <IntroProvider>
           <Cursor />
           <SpiderSense />
+          <Thwip />
           <Header />
           <RecruiterDrawer />
           {children}
+          <HeightenedSenses />
         </IntroProvider>
       </RecruiterModeProvider>
     </MotionConfig>

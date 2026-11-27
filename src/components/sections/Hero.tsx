@@ -25,7 +25,7 @@ const EASE = [0.16, 1, 0.3, 1] as const;
  * Hero — the title card, and the first thing you can play with.
  *
  * - The web in the corner is tugged toward your cursor and springs back; click
- *   anywhere and a strand fires from the nearest top corner and sticks.
+ *   anywhere and an organic strand fires from the nearest lower corner and sticks.
  * - The name tilts in 3D toward the pointer, and each letter lifts when touched.
  * - The skyline drifts against the pointer for depth, and scrolls away slower
  *   than the page.
@@ -60,6 +60,7 @@ export function Hero() {
   return (
     <section
       id="top"
+      data-sense="These webs are drawn on a canvas with simple spring physics. No WebGL, and it pauses off screen."
       ref={ref}
       onPointerMove={(e) => {
         if (reduceMotion || e.pointerType === "touch") return;

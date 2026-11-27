@@ -174,7 +174,7 @@ export type SceneSpec = {
 };
 
 /**
- * The nine scenes of the run, in order, one before each chapter after the hero:
+ * The eight scenes of the run, in order, one before each chapter after the hero:
  * from the last of the night to the first of the morning.
  */
 export const SCENES: SceneSpec[] = [
@@ -186,7 +186,6 @@ export const SCENES: SceneSpec[] = [
   { from: SURFACE.overcast, to: SURFACE.overcast, t: 0.58, variant: "spire", seed: 6 },
   { from: SURFACE.overcast, to: SURFACE.dawn, t: 0.78, variant: "chimney", seed: 7 },
   { from: SURFACE.dawn, to: SURFACE.morning, t: 0.9, variant: "rooftop", seed: 8 },
-  { from: SURFACE.morning, to: SURFACE.morning, t: 1, variant: "skyline", seed: 9 },
 ];
 
 /** Where the web strand attaches in each scene (in the 1600x520 scene space). */

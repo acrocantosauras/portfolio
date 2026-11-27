@@ -313,7 +313,7 @@ export function UchitVision() {
           </div>
         </div>
 
-        <motion.figure
+        <motion.figure data-sense="This tracking view is a drawn illustration animated on this page. It is not footage."
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}

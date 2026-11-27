@@ -22,7 +22,7 @@ const STICKERS = [
  */
 export function Contact() {
   return (
-    <section id="contact" className="surface-morning relative overflow-hidden py-28 sm:py-36">
+    <section id="contact" className="surface-morning relative overflow-hidden pt-28 pb-10 sm:pt-36 sm:pb-12">
       <ChapterMark n="08" className="-top-[0.1em] -right-[0.06em] text-dawn-ink/[0.07]" />
       <span
         aria-hidden

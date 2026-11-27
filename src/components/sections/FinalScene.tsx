@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { RotateCcw } from "lucide-react";
+import { Download, RotateCcw } from "lucide-react";
 import { Mark } from "@/components/ui/Mark";
 import { Skyline } from "@/components/ui/Skyline";
+import { WebSlinger } from "@/components/ui/WebSlinger";
 import { useIntro } from "@/components/intro/IntroSequence";
 import { profile } from "@/data/resume";
 
@@ -17,151 +18,155 @@ const EGG_LINES = [
   "Okay, you found it. Hi.",
 ];
 
-const CREDITS: [string, string][] = [
-  ["Written, designed and built by", "Meet Jadhav"],
-  ["Set in", "Bebas Neue, Big Shoulders, Instrument Serif, Inter, JetBrains Mono"],
-  ["Built with", "Next.js, TypeScript, Motion"],
-  ["Shown on", "Cloudflare Workers"],
-];
-
-const link =
-  "text-paper underline decoration-paper/30 underline-offset-4 transition-colors hover:text-signal-red-bright hover:decoration-signal-red-bright";
-
 /**
- * The end card. A letterboxed film frame: the last of the web strand drops from
- * the top edge to the sun coming up over the rooftops, the thank-you is set big,
- * and the credits roll as a film's would. Two Easter eggs live here (click the
- * monogram three times, or click the sun); a third, the Konami code, works
- * anywhere on the page.
+ * The ending, which continues the Say Hi chapter rather than starting a new one:
+ * the sun comes up over a pale city, the web-slinger who ran the rooftops waves
+ * from one of them, and the credits sit underneath in small type. Two Easter eggs
+ * live here (click the monogram three times, or click the sun).
  */
 export function FinalScene() {
   const [clicks, setClicks] = useState(0);
   const [egg, setEgg] = useState<string | null>(null);
+  const [waving, setWaving] = useState(false);
   const { replay } = useIntro();
 
-  function say(line: string) {
-    setEgg(line);
-    window.setTimeout(() => setEgg(null), 2800);
-  }
+  useEffect(() => {
+    if (!egg) return;
+    const id = window.setTimeout(() => setEgg(null), 2800);
+    return () => window.clearTimeout(id);
+  }, [egg]);
+
+  useEffect(() => {
+    if (!waving) return;
+    const id = window.setTimeout(() => setWaving(false), 2400);
+    return () => window.clearTimeout(id);
+  }, [waving]);
+
   function handleMarkClick() {
     const next = clicks + 1;
     setClicks(next);
     if (next >= 3) {
-      say(EGG_LINES[Math.floor(Math.random() * EGG_LINES.length)]);
+      setEgg(EGG_LINES[Math.floor(Math.random() * EGG_LINES.length)]);
       setClicks(0);
     }
   }
 
   return (
-    <footer className="surface-morning relative overflow-hidden px-4 pt-2 pb-16 sm:px-8 sm:pb-24">
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-80px" }}
-        transition={{ duration: 0.9, ease: EASE }}
-        className="relative mx-auto min-h-[32rem] max-w-7xl overflow-hidden bg-ink text-paper sm:aspect-[2.39/1] sm:min-h-[26rem]"
+    <footer className="surface-morning relative -mt-px overflow-hidden pb-24 sm:pb-16">
+      <div
+        data-sense="Hosted on Cloudflare Workers, with a content security policy on the pages."
+        className="relative h-[430px] sm:h-[470px]"
       >
-        {/* sunrise behind the rooftops */}
+        {/* first light behind the city */}
         <div
-          className="absolute inset-0 bg-[radial-gradient(60%_70%_at_50%_100%,rgba(255,196,120,0.55),rgba(255,120,80,0.18)_45%,transparent_72%),linear-gradient(to_bottom,#04060d,#131a2e_70%,#2a2f44)]"
           aria-hidden
-        />
-        <Skyline className="pointer-events-none absolute inset-x-0 bottom-0 h-[34%] w-full text-[#080b14]" />
-
-        {/* the last of the thread: from the top edge down to the sun */}
-        <motion.span
-          aria-hidden
-          className="absolute top-0 left-1/2 h-[74%] w-px origin-top bg-signal-red-bright"
-          initial={{ scaleY: 0 }}
-          whileInView={{ scaleY: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1.6, delay: 0.4, ease: EASE }}
-        />
-        <button
-          type="button"
-          onClick={() => say("Good morning, New York.")}
-          aria-label="The sun. Click to say good morning."
-          className="absolute bottom-[26%] left-1/2 h-14 w-14 -translate-x-1/2 translate-y-1/2 rounded-full bg-[radial-gradient(circle,#fff3c4_0%,#ffc878_55%,rgba(255,170,100,0)_72%)] transition-transform duration-300 hover:scale-125"
+          className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_30%,rgba(246,214,150,0.55)_75%,rgba(244,184,128,0.7))]"
         />
 
-        {/* letterbox bars */}
-        <span aria-hidden className="absolute inset-x-0 top-0 h-3 bg-black sm:h-5" />
-        <span aria-hidden className="absolute inset-x-0 bottom-0 h-3 bg-black sm:h-5" />
-
-        <div className="relative grid h-full grid-cols-1 content-between gap-10 px-6 pt-12 pb-12 sm:grid-cols-12 sm:px-12 sm:pt-16 sm:pb-14">
-          <div className="sm:col-span-7">
-            <p className="font-serif text-[clamp(2.8rem,7vw,6rem)] leading-[0.95] text-paper italic">
-              Thanks for reading.
-            </p>
-            <nav className="mt-6 flex flex-wrap items-center gap-x-7 gap-y-2 text-base" aria-label="Footer">
-              <a href={profile.github} target="_blank" rel="noreferrer" className={link}>
-                GitHub
-              </a>
-              <a href={profile.linkedin} target="_blank" rel="noreferrer" className={link}>
-                LinkedIn
-              </a>
-              <a href={profile.resumeUrl} download className={link}>
-                Resume
-              </a>
-              <a href={`mailto:${profile.email}`} className={link}>
-                Email
-              </a>
-              <button
-                type="button"
-                onClick={replay}
-                aria-label="Replay the opening title sequence"
-                className="inline-flex items-center gap-2 text-paper-dim transition-colors hover:text-signal-red-bright"
-              >
-                <RotateCcw size={14} /> Replay the run
-              </button>
-            </nav>
-          </div>
-
-          {/* the credits, as a film would roll them */}
-          <dl className="space-y-3 font-mono text-[11px] leading-relaxed sm:col-span-5 sm:justify-self-end sm:text-right">
-            {CREDITS.map(([k, v]) => (
-              <div key={k}>
-                <dt className="tracking-[0.2em] text-paper-dim uppercase">{k}</dt>
-                <dd className="text-paper">{v}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-
-        {/* lower strip: the monogram (egg), the line it says, the legal line */}
-        <div className="absolute inset-x-0 bottom-3 flex items-end justify-between gap-4 px-5 sm:bottom-6 sm:px-10">
-          <div className="flex items-center gap-3">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.8, ease: EASE }}
+          className="relative z-10 px-6 pt-6 text-center"
+        >
+          <p className="font-serif text-[clamp(2.8rem,7vw,5.5rem)] leading-[0.95] text-dawn-ink italic">
+            Thanks for reading.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
+            <a
+              href={profile.resumeUrl}
+              download
+              className="inline-flex items-center gap-2 bg-dawn-ink px-6 py-3 text-sm font-medium text-dawn-warm transition-colors hover:bg-signal-red-deep"
+            >
+              <Download size={15} /> Resume
+            </a>
             <button
               type="button"
-              onClick={handleMarkClick}
-              aria-label="Easter egg"
-              className="shrink-0 text-paper opacity-70 transition-opacity hover:opacity-100"
+              onClick={replay}
+              aria-label="Replay the opening title sequence"
+              className="inline-flex items-center gap-2 border-2 border-dawn-ink px-5 py-2.5 text-sm text-dawn-ink transition-colors hover:border-signal-red-deep hover:text-signal-red-deep"
             >
-              <Mark className="h-8 w-8" />
+              <RotateCcw size={14} /> Replay the run
             </button>
-            <AnimatePresence>
-              {egg && (
-                <motion.p
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  className="font-mono text-[11px] tracking-wide text-gold"
-                  role="status"
-                >
-                  {egg}
-                </motion.p>
-              )}
-            </AnimatePresence>
           </div>
-          <p className="hidden max-w-sm text-right text-[11px] leading-snug text-paper-dim sm:block">
-            © 2026 {profile.name}. Original artwork with a Spider-Man-inspired direction; not affiliated with Marvel or Sony.
+        </motion.div>
+
+        {/* the sun, rising as you reach it */}
+        <motion.button
+          type="button"
+          onClick={() => {
+            setEgg("Good morning, New York.");
+            setWaving(true);
+          }}
+          aria-label="The sun. Click to say good morning."
+          initial={{ y: 90, x: "-50%" }}
+          whileInView={{ y: 0, x: "-50%" }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 2.2, ease: EASE }}
+          whileHover={{ scale: 1.12 }}
+          className="absolute bottom-6 left-1/2 h-40 w-40 rounded-full bg-[radial-gradient(circle,#fff6d2_0%,#ffd27d_45%,#ffb866_55%,rgba(255,184,102,0)_71%)]"
+        />
+
+        <Skyline className="pointer-events-none absolute inset-x-0 bottom-0 h-[34%] w-full text-[#a9a3a0]" />
+
+        {/* the nearest roof, and who is standing on it */}
+        <div className="absolute bottom-0 left-[6%] w-40 sm:left-[16%] sm:w-52">
+          <button
+            type="button"
+            onClick={() => setWaving(true)}
+            onPointerEnter={() => setWaving(true)}
+            onFocus={() => setWaving(true)}
+            aria-label="The web-slinger on the roof. Click for a wave."
+            className="relative mx-auto -mb-1 block h-28 w-24"
+          >
+            <svg viewBox="-42 -92 84 96" className="h-full w-full overflow-visible" aria-hidden>
+              <WebSlinger pose="stand" waving={waving} />
+            </svg>
+          </button>
+          <div aria-hidden className="suit-weave h-2.5" />
+          <div
+            aria-hidden
+            className="h-16 bg-[#20232c] bg-[linear-gradient(90deg,transparent_14px,rgba(242,194,48,0.55)_14px_22px,transparent_22px)] bg-[length:44px_14px] bg-[position:10px_18px] bg-repeat-x"
+          />
+        </div>
+
+        <AnimatePresence>
+          {egg && (
+            <motion.p
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              role="status"
+              className="absolute right-4 bottom-4 z-10 bg-dawn-ink px-3 py-2 font-mono text-[11px] tracking-wide text-gold sm:right-10"
+            >
+              {egg}
+            </motion.p>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* the small print */}
+      <div className="border-t-2 border-dawn-ink px-6 pt-5 sm:px-12">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:pl-24">
+          <button
+            type="button"
+            onClick={handleMarkClick}
+            aria-label="Easter egg"
+            className="w-fit shrink-0 text-dawn-ink transition-colors hover:text-signal-red-deep"
+          >
+            <Mark className="h-8 w-8" />
+          </button>
+          <p className="max-w-xl font-mono text-[11px] leading-relaxed text-dawn-ink/85">
+            Written, designed and built by {profile.name}. Set in Bebas Neue, Big Shoulders,
+            Instrument Serif, Inter and JetBrains Mono. Built with Next.js, TypeScript and Motion.
+          </p>
+          <p className="max-w-sm text-[11px] leading-relaxed text-dawn-ink/85 sm:text-right">
+            © 2026 {profile.name}. Original artwork with a Spider-Man-inspired direction; not
+            affiliated with Marvel or Sony.
           </p>
         </div>
-      </motion.div>
-
-      <p className="mx-auto mt-4 max-w-7xl text-center text-[11px] leading-snug text-dawn-ink/80 sm:hidden">
-        © 2026 {profile.name}. Original artwork with a Spider-Man-inspired direction; not affiliated with Marvel or Sony.
-      </p>
+      </div>
     </footer>
   );
 }

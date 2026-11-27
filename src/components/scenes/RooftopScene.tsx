@@ -211,7 +211,7 @@ export function RooftopScene({ spec }: { spec: SceneSpec }) {
 
   return (
     <div
-      ref={ref}
+      ref={ref} data-sense="Each skyline is generated from a fixed seed, so the server and your browser draw the same city."
       aria-hidden
       className="relative h-[330px] w-full overflow-hidden sm:h-[460px]"
       style={{ background: sky }}
