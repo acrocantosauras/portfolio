@@ -74,7 +74,7 @@ export function CaseFile() {
                 <dl className="font-mono text-[13px] text-dawn-ink">
                   {fields.map(([k, v]) => (
                     <div key={k} className="grid grid-cols-[6.5rem_1fr] gap-x-3 border-b border-dawn-ink/30 py-3">
-                      <dt className="tracking-[0.18em] text-dawn-ink/60">{k}</dt>
+                      <dt className="tracking-[0.18em] text-dawn-ink/80">{k}</dt>
                       <dd className="leading-relaxed">{v}</dd>
                     </div>
                   ))}
@@ -103,7 +103,7 @@ export function CaseFile() {
                 className="relative lg:col-span-7"
               >
                 {/* dimension line along the top */}
-                <div aria-hidden className="mb-3 flex items-center gap-2 font-mono text-[10px] tracking-[0.18em] text-dawn-ink/70">
+                <div aria-hidden className="mb-3 flex items-center gap-2 font-mono text-[11px] tracking-[0.18em] text-dawn-ink/70">
                   <span className="h-2 w-px bg-current" />
                   <span className="h-px flex-1 bg-current" />
                   <span>ONE PAGE</span>
@@ -133,7 +133,7 @@ export function CaseFile() {
                 {/* callout bracket */}
                 <p
                   aria-hidden
-                  className="mt-3 flex items-center gap-2 font-mono text-[10px] tracking-[0.18em] text-dawn-ink/70"
+                  className="mt-3 flex items-center gap-2 font-mono text-[11px] tracking-[0.18em] text-dawn-ink/70"
                 >
                   <span className="h-px w-8 bg-current" /> 3 PROJECTS · REPOS LINKED
                 </p>
@@ -144,7 +144,7 @@ export function CaseFile() {
                   className="pointer-events-none absolute -right-2 bottom-24 hidden -rotate-12 border-[3px] border-signal-red-deep px-4 py-1.5 text-center font-display text-3xl leading-none tracking-[0.12em] text-signal-red-deep opacity-85 sm:block"
                 >
                   ON FILE
-                  <span className="mt-1 block font-mono text-[10px] tracking-[0.2em]">NOV 2026</span>
+                  <span className="mt-1 block font-mono text-[11px] tracking-[0.2em]">NOV 2026</span>
                 </span>
               </motion.div>
             </div>

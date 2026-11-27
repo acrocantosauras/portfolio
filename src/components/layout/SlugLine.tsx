@@ -34,7 +34,7 @@ export function SlugLine() {
     <p
       ref={ref}
       aria-hidden
-      className="pointer-events-none fixed right-4 bottom-4 z-40 font-mono text-[10px] tracking-[0.16em] text-white mix-blend-difference sm:right-6 sm:bottom-5 sm:text-[11px]"
+      className="pointer-events-none fixed right-4 bottom-4 z-40 font-mono text-[11px] tracking-[0.16em] text-white mix-blend-difference sm:right-6 sm:bottom-5 sm:text-[11px]"
     >
       {format(0)}
     </p>

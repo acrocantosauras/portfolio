@@ -23,6 +23,7 @@ import {
   type TaskState,
   type TaskStatus,
 } from "@/lib/aegis-sim";
+import { FreezeFrame } from "@/components/sections/FreezeFrame";
 import { useReducedMotionSafe } from "@/lib/reduced-motion";
 import { cn } from "@/lib/utils";
 
@@ -90,6 +91,8 @@ export function AegisSimulator() {
   const [run, setRun] = useState<Run | null>(null);
   const runRef = useRef<Run | null>(null);
   const visibleRef = useRef(true);
+  // same fact as visibleRef, as state: the freeze must lift when the simulator leaves the screen
+  const [inView, setInView] = useState(true);
   const rootRef = useRef<HTMLDivElement>(null);
   const logRef = useRef<HTMLOListElement>(null);
 
@@ -121,6 +124,7 @@ export function AegisSimulator() {
     if (!el) return;
     const io = new IntersectionObserver(([e]) => {
       visibleRef.current = e.isIntersecting;
+      setInView(e.isIntersecting);
     });
     io.observe(el);
     return () => io.disconnect();
@@ -202,7 +206,7 @@ export function AegisSimulator() {
     <div ref={rootRef} className="mt-16 border border-hairline bg-ink-soft">
       {/* the honesty banner: always visible */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-gold/40 bg-gold/[0.07] px-4 py-3 sm:px-6">
-        <span className="border border-gold px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.18em] text-gold">
+        <span className="border border-gold px-2 py-0.5 font-mono text-[11px] font-bold tracking-[0.18em] text-gold">
           SIMULATION
         </span>
         <p className="text-sm text-paper/90">
@@ -258,7 +262,7 @@ export function AegisSimulator() {
               disabled={Boolean(running)}
               maxLength={120}
               placeholder="e.g. Research competitors and write a short brief"
-              className="w-full max-w-xl border border-hairline bg-ink px-3 py-2 text-sm text-paper placeholder:text-paper-dim/60 focus:border-signal-red-bright focus:outline-none"
+              className="w-full max-w-xl border border-hairline bg-ink px-3 py-2 text-sm text-paper placeholder:text-paper-dim focus:border-signal-red-bright focus:outline-none"
             />
           </label>
         )}
@@ -268,7 +272,7 @@ export function AegisSimulator() {
             <button
               type="button"
               onClick={start}
-              className="suit-weave inline-flex items-center gap-2 border-2 border-ink px-5 py-2.5 text-sm font-semibold text-paper [text-shadow:0_1px_0_rgba(0,0,0,0.6)] transition-[filter] hover:brightness-110"
+              className="suit-weave inline-flex items-center gap-2 border-2 border-ink px-5 py-2.5 text-sm font-semibold text-white [text-shadow:0_1px_0_rgba(0,0,0,0.6)] transition-[filter] hover:brightness-110"
             >
               <Play size={15} /> {run?.phase === "done" ? "Run again" : "Run it"}
             </button>
@@ -324,12 +328,12 @@ export function AegisSimulator() {
                       ? "font-medium text-signal-red-bright"
                       : run && i < phaseIndex
                         ? "text-paper"
-                        : "text-paper-dim/60"
+                        : "text-paper-dim"
                   )}
                 >
                   {p.label}
                 </span>
-                {i < PHASES.length - 1 && <span className="text-paper-dim/40" aria-hidden>/</span>}
+                {i < PHASES.length - 1 && <span className="text-paper-dim" aria-hidden>/</span>}
               </li>
             ))}
           </ol>
@@ -433,7 +437,7 @@ export function AegisSimulator() {
                           {AGENT_NAME[t.agent]} · <span className="font-mono">{t.tool}</span>
                         </p>
                         {t.deps.length > 0 && (
-                          <p className="mt-0.5 text-[11px] text-paper-dim/70 lg:hidden">
+                          <p className="mt-0.5 text-[11px] text-paper-dim lg:hidden">
                             after: {t.deps.map((d) => preset.tasks.find((x) => x.id === d)!.label).join(", ")}
                           </p>
                         )}
@@ -446,7 +450,7 @@ export function AegisSimulator() {
                                 ? "text-signal-red-bright"
                                 : state.status === "approval" || state.status === "backoff"
                                   ? "text-gold"
-                                  : "text-paper-dim/70"
+                                  : "text-paper-dim"
                           )}
                         >
                           {run
@@ -618,7 +622,7 @@ export function AegisSimulator() {
           <p className="mt-6 text-sm font-medium text-paper">Event log</p>
           <ol
             ref={logRef}
-            className="mt-2 h-72 overflow-y-auto border border-hairline bg-ink px-3 py-2 font-mono text-[11.5px] leading-relaxed"
+            className="mt-2 h-72 overflow-y-auto border border-hairline bg-ink px-3 py-2 font-mono text-xs leading-relaxed"
             aria-label="Simulation event log"
           >
             {run?.log.length ? (
@@ -633,12 +637,12 @@ export function AegisSimulator() {
                     l.kind === "info" && "text-paper-dim"
                   )}
                 >
-                  <span className="text-paper-dim/50">{(l.t / 1000).toFixed(1).padStart(5, " ")}s </span>
+                  <span className="text-paper-dim">{(l.t / 1000).toFixed(1).padStart(5, " ")}s </span>
                   {l.text}
                 </li>
               ))
             ) : (
-              <li className="text-paper-dim/60">Waiting for a run. Everything here is simulated.</li>
+              <li className="text-paper-dim">Waiting for a run. Everything here is simulated.</li>
             )}
           </ol>
         </aside>
@@ -697,6 +701,8 @@ export function AegisSimulator() {
           </div>
         </div>
       )}
+
+      <FreezeFrame run={run} inView={inView} reduceMotion={Boolean(reduceMotion)} />
 
       {/* what is modelled, for engineers */}
       <details className="border-t border-hairline px-4 py-4 text-sm sm:px-6">

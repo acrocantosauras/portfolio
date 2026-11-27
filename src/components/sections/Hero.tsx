@@ -193,7 +193,7 @@ export function Hero() {
               <Magnetic>
                 <a
                   href="#aegisforge"
-                  className="suit-weave inline-flex items-center gap-2 border-2 border-ink px-6 py-3 text-sm font-semibold text-paper [text-shadow:0_1px_0_rgba(0,0,0,0.6)] transition-[filter] hover:brightness-110"
+                  className="suit-weave inline-flex items-center gap-2 border-2 border-ink px-6 py-3 text-sm font-semibold text-white [text-shadow:0_1px_0_rgba(0,0,0,0.6)] transition-[filter] hover:brightness-110"
                 >
                   View work <ArrowDown size={15} />
                 </a>

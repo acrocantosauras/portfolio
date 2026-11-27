@@ -128,7 +128,7 @@ export function AegisForge() {
                     <span
                       className={cn(
                         "hidden text-sm transition-colors sm:block",
-                        open ? "text-paper-dim" : "text-paper-dim/60"
+                        "text-paper-dim"
                       )}
                     >
                       {agent.role}

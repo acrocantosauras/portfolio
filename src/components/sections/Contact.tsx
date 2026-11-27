@@ -92,7 +92,7 @@ export function Contact() {
                     rel={s.href.startsWith("http") ? "noreferrer" : undefined}
                     className={`block ${s.tilt} border-2 border-dawn-ink px-5 py-3 shadow-[5px_5px_0_0_var(--color-dawn-ink)] transition-transform duration-200 hover:-translate-y-1 hover:rotate-0 ${s.surface}`}
                   >
-                    <span className="block text-[11px] tracking-[0.18em] uppercase opacity-80">{s.label}</span>
+                    <span className="block text-[11px] tracking-[0.18em] uppercase">{s.label}</span>
                     <span className="font-display text-xl tracking-wide break-words sm:text-2xl">{s.value}</span>
                   </a>
                 </motion.li>

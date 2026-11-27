@@ -84,7 +84,7 @@ export function Workshop() {
               <ol className="mt-7 grid max-w-xl gap-x-8 gap-y-2.5 sm:grid-cols-2">
                 {ai.items.map((it, i) => (
                   <li key={it} className="flex items-baseline gap-3 text-lg text-paper">
-                    <span className="font-mono text-[10px] text-web-blue-bright">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="font-mono text-[11px] text-web-blue-bright">{String(i + 1).padStart(2, "0")}</span>
                     {it}
                   </li>
                 ))}

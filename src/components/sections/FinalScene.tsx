@@ -153,13 +153,13 @@ export function FinalScene() {
               )}
             </AnimatePresence>
           </div>
-          <p className="hidden max-w-sm text-right text-[10px] leading-snug text-paper-dim sm:block">
+          <p className="hidden max-w-sm text-right text-[11px] leading-snug text-paper-dim sm:block">
             © 2026 {profile.name}. Original artwork with a Spider-Man-inspired direction; not affiliated with Marvel or Sony.
           </p>
         </div>
       </motion.div>
 
-      <p className="mx-auto mt-4 max-w-7xl text-center text-[11px] leading-snug text-dawn-ink/60 sm:hidden">
+      <p className="mx-auto mt-4 max-w-7xl text-center text-[11px] leading-snug text-dawn-ink/80 sm:hidden">
         © 2026 {profile.name}. Original artwork with a Spider-Man-inspired direction; not affiliated with Marvel or Sony.
       </p>
     </footer>

@@ -199,7 +199,7 @@ function TrackingFrame({ reduceMotion }: { reduceMotion: boolean }) {
         aria-hidden
       />
       <span
-        className="absolute top-2 -translate-x-1/2 font-mono text-[9px] tracking-wide text-paper/70"
+        className="absolute top-2 -translate-x-1/2 font-mono text-[11px] tracking-wide text-paper/70"
         style={{ left: `${LINE_X * 100}%` }}
         aria-hidden
       >
@@ -226,7 +226,7 @@ function TrackingFrame({ reduceMotion }: { reduceMotion: boolean }) {
             }`}
           />
           <div className="absolute inset-0 border border-paper/85">
-            <span className="absolute -top-5 left-0 flex whitespace-nowrap bg-signal-red px-1.5 py-0.5 font-mono text-[9px] font-bold tracking-wide text-paper">
+            <span className="absolute -top-5 left-0 flex whitespace-nowrap bg-signal-red px-1.5 py-0.5 font-mono text-[11px] font-bold tracking-wide text-white">
               PERSON {w.id}
               <span className="ml-1.5 font-normal opacity-80">{w.conf.toFixed(2)}</span>
             </span>
@@ -248,19 +248,19 @@ function TrackingFrame({ reduceMotion }: { reduceMotion: boolean }) {
       />
 
       {/* on-screen display */}
-      <div className="absolute top-3 left-4 flex items-center gap-2 font-mono text-[10px] tracking-wide text-paper/90">
+      <div className="absolute top-3 left-4 flex items-center gap-2 font-mono text-[11px] tracking-wide text-paper/90">
         <span className="h-1.5 w-1.5 rounded-full bg-signal-red-bright" aria-hidden />
         CAM 04
       </div>
-      <div className="absolute top-3 right-4 font-mono text-[10px] tracking-wide text-paper/70">
+      <div className="absolute top-3 right-4 font-mono text-[11px] tracking-wide text-paper/70">
         {stamp}
       </div>
-      <div className="absolute bottom-3 left-4 font-mono text-[10px] tracking-wide text-paper/80">
+      <div className="absolute bottom-3 left-4 font-mono text-[11px] tracking-wide text-paper/80">
         IN {String(tally.inn).padStart(2, "0")} · OUT {String(tally.out).padStart(2, "0")}
       </div>
       <span
         ref={coordRef}
-        className="absolute right-4 bottom-3 font-mono text-[10px] tracking-wide text-paper/60"
+        className="absolute right-4 bottom-3 font-mono text-[11px] tracking-wide text-paper/60"
         aria-hidden
       />
     </div>

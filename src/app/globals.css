@@ -33,7 +33,7 @@
   /* Suit colours. The costume designer dyed the fabric away from pink toward an
      orange-red, and the blue toward turquoise, so the red leans warm and the
      blue leans bright. */
-  --color-signal-red: #e0342b;
+  --color-signal-red: #dc3128;
   --color-signal-red-bright: #ff5445; /* AA on ink */
   --color-web-blue: #1d5fd1;
   --color-web-blue-bright: #6b9bff;
@@ -381,4 +381,24 @@ html.has-custom-cursor * {
 }
 .panel-c {
   clip-path: polygon(4% 0, 100% 0, 96% 100%, 0 100%);
+}
+
+/* ---- the freeze (AegisForge simulator, while a crashed worker's task is orphaned) ---- */
+.freeze-veil {
+  background: rgba(4, 6, 13, 0.12);
+  -webkit-backdrop-filter: grayscale(1) contrast(1.05);
+  backdrop-filter: grayscale(1) contrast(1.05);
+}
+html.is-frozen *:not(.freeze-veil, .freeze-veil *) {
+  animation-play-state: paused !important;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .freeze-veil {
+    animation: freeze-in 0.28s ease-out both;
+  }
+}
+@keyframes freeze-in {
+  from {
+    opacity: 0;
+  }
 }

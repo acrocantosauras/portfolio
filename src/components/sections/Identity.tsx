@@ -2,6 +2,8 @@
 
 import { motion } from "motion/react";
 import { ChapterMark } from "@/components/ui/ChapterMark";
+import { Mark } from "@/components/ui/Mark";
+import PixelTransition from "@/components/ui/PixelTransition";
 import { profile } from "@/data/resume";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -47,24 +49,44 @@ export function Identity() {
             whileInView={{ opacity: 1, y: 0, rotate: -2 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.9, ease: EASE }}
-            className="relative z-10 max-w-sm sm:max-w-md lg:col-span-5 lg:max-w-none"
+            className="relative z-10 max-w-sm sm:max-w-md lg:col-span-5 lg:col-start-1 lg:row-start-1 lg:max-w-none lg:self-start"
           >
             <div className="relative aspect-[4/5] overflow-hidden border-2 border-paper bg-black shadow-[12px_12px_0_0_var(--color-signal-red)]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/images/meet-jadhav.jpg"
-                alt={`Portrait of ${profile.name}`}
-                width={600}
-                height={692}
-                loading="lazy"
-                decoding="async"
-                className="h-full w-full object-cover object-top [filter:contrast(1.04)_saturate(1.06)]"
+              <PixelTransition
+                className="!absolute inset-0 h-full"
+                aspectRatio="4 / 5"
+                label="Portrait. Hover, focus or tap to look at the mask."
+                gridSize={18}
+                pattern="ripple"
+                pixelAnimation="grow"
+                pixelColor="var(--color-signal-red)"
+                mosaic={0.35}
+                animationStepDuration={0.35}
+                firstContent={
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/images/meet-jadhav.jpg"
+                      alt={`Portrait of ${profile.name}`}
+                      width={600}
+                      height={692}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-full w-full object-cover object-top [filter:contrast(1.04)_saturate(1.06)]"
+                    />
+                    <div
+                      className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent via-45% to-transparent"
+                      aria-hidden
+                    />
+                  </>
+                }
+                secondContent={
+                  <div aria-hidden className="suit-weave flex h-full w-full items-center justify-center">
+                    <Mark className="h-2/5 w-2/5 text-paper" />
+                  </div>
+                }
               />
-              <div
-                className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent via-45% to-transparent"
-                aria-hidden
-              />
-              <figcaption className="absolute inset-x-0 bottom-0 p-5">
+              <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] p-5">
                 <span className="font-display text-3xl tracking-wide text-paper">{profile.name}</span>
                 <span className="mt-1 block text-sm text-paper-dim">{profile.location}</span>
               </figcaption>
@@ -80,7 +102,7 @@ export function Identity() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
-            className="relative z-20 border border-hairline bg-ink/90 px-7 py-9 backdrop-blur-[2px] sm:px-10 lg:col-span-8 lg:col-start-5 lg:mt-24 lg:-ml-10"
+            className="relative z-20 border border-hairline bg-ink/90 px-7 py-9 backdrop-blur-[2px] sm:px-10 lg:col-span-8 lg:col-start-5 lg:row-start-1 lg:mt-24 lg:-ml-10"
           >
             <p className="font-serif text-3xl leading-snug text-paper sm:text-[2.6rem]">{lead}</p>
 

@@ -168,7 +168,7 @@ export function Missions() {
                     >
                       {p.title}
                     </h3>
-                    <p className={cn("mt-3 text-sm", light ? "text-dawn-ink/70" : "text-paper-dim")}>
+                    <p className={cn("mt-3 text-sm", light ? "text-dawn-ink/80" : "text-paper/85")}>
                       {p.period} · {STATUS_LABEL[p.status]}
                     </p>
                     <p
@@ -235,7 +235,7 @@ export function Missions() {
             <ol className="mt-2 flex flex-col gap-1">
               {peek.architecture.nodes.slice(0, 5).map((n, i) => (
                 <li key={n.id} className="flex items-center gap-2 text-[13px]">
-                  <span className="font-mono text-[10px] text-signal-red-bright">{i + 1}</span>
+                  <span className="font-mono text-[11px] text-signal-red-bright">{i + 1}</span>
                   <span>{n.label}</span>
                   {i < 4 && <ArrowRight size={11} className="ml-auto text-paper-dim" />}
                 </li>
